@@ -1,50 +1,51 @@
-# Welcome to your Expo app 👋
+# 📚 StudyPal
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+StudyPal is your personal study companion — a React Native + Expo app that helps you organize daily tasks, beat procrastination with Pomodoro timers, and build better study habits, one session at a time. 🎯
 
-## Get started
+## ✨ Features
 
-1. Install dependencies
+- ✅ Daily task management (to-do list)
+- ⏱️ Pomodoro timer to stay focused
+- 📱 Works on both Android & iOS
+- 🎨 Clean and minimal UI
 
-   ```bash
-   npm install
-   ```
+## 🛠️ Tech Stack
 
-2. Start the app
+- **Framework:** React Native + Expo
+- **Language:** TypeScript
+- **Styling:** NativeWind (Tailwind CSS for React Native)
+- **Routing:** Expo Router (file-based)
 
-   ```bash
-   npx expo start
-   ```
+## 📁 Project Structure
 
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+```
+├── app/           # Screens and file-based routing
+├── components/    # Reusable UI components
+├── assets/        # Images, fonts, and static files
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## 🚀 Getting Started
 
-## Learn more
+Clone the repo and install dependencies:
 
-To learn more about developing your project with Expo, look at the following resources:
+```bash
+git clone https://github.com/MONISHA2876/StudyPal.git
+cd StudyPal
+npm install
+```
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+Start the development server:
 
-## Join the community
+```bash
+npx expo start
+```
 
-Join our community of developers creating universal apps.
+Then open the app using one of these options:
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+- 📱 **Expo Go** — scan the QR code on your phone
+- 🤖 **Android Emulator** — via Android Studio
+- 🍎 **iOS Simulator** — via Xcode (macOS only)
+
+## 📄 License
+
+This project is open source and available under the [MIT License](LICENSE).
