@@ -1,5 +1,7 @@
+import { sampleTasks } from "@/test/data";
+import { Task } from "@/types/types";
 import { useState } from "react";
-import { Text, View } from "react-native";
+import { Image, Pressable, Text, View } from "react-native";
 import {
   SafeAreaView,
   useSafeAreaInsets,
@@ -14,9 +16,25 @@ function HookComponent() {
 
 export default function HomePage() {
   const [selectedDate, setSelectedDate] = useState(new Date());
+
+  let filteredTasks: Task[] = [];
+
+  let filterTask = () => {
+    filteredTasks = sampleTasks.filter((task) => {
+      if (task.createdAt.toDateString() === selectedDate.toDateString()) {
+        return true;
+      }
+    });
+  };
+  filterTask();
+
   const handleDateChange = (date: Date) => {
     setSelectedDate(date);
-    // You can also fetch tasks for the selected date here
+    filterTask();
+  };
+
+  const handleIsComplete = () => {
+    console.log("Task completed!");
   };
 
   return (
@@ -38,8 +56,49 @@ export default function HomePage() {
         </View>
       </View>
 
-      <View id="tasksList" className="w-screen h-full bg-gray-100">
-        {/* We will show task list according to the selected date */}
+      <View
+        id="tasksList"
+        className="w-screen h-full bg-gray-100 flex items-center justify-start p-6 gap-6"
+      >
+        {filteredTasks.map((task) => {
+          return (
+            <View
+              key={task.id}
+              className="w-full rounded-lg p-4 flex flex-row justify-between"
+              style={{ backgroundColor: task.color }}
+            >
+              <View className="flex justify-start items-start gap-4">
+                <Text className="text-[#3F3939] font-normal font-md font-inter opacity-[51%]">
+                  {task.timeSlot || "Any Time"}
+                </Text>
+                <Text className="text-black font-bold font-inter font-xl">
+                  {task.emoji} {task.title}
+                </Text>
+                <Text className="text-[#3F3939] font-normal font-md font-inter opacity-[51%]">
+                  {task.duration ? `${task.duration} minutes` : "All day"}
+                </Text>
+              </View>
+              <View className="flex justify-start items-end">
+                <Text className="text-[#3F3939] font-normal font-md font-inter opacity-[51%]">
+                  {task.Categories ? task.Categories.join(", ") : " "}
+                </Text>
+                <Pressable
+                  onPressOut={handleIsComplete}
+                  className="border border-black h-8 w-8 rounded-full p-1 mt-2"
+                >
+                  <Image
+                    source={require("../assets/images/Icons/Completed.png")}
+                    style={{
+                      width: 20,
+                      height: 20,
+                      opacity: task.isCompleted ? 1 : 0,
+                    }}
+                  />
+                </Pressable>
+              </View>
+            </View>
+          );
+        })}
       </View>
     </SafeAreaView>
   );
