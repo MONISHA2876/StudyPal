@@ -1,6 +1,7 @@
+import { getValueFor, save } from "@/database/SecureStoreFunctions";
 import { sampleTasks } from "@/test/data";
 import { Task } from "@/types/types";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Image, Pressable, Text, View } from "react-native";
 import {
   SafeAreaView,
@@ -16,25 +17,44 @@ function HookComponent() {
 
 export default function HomePage() {
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [allTasks, setAllTasks] = useState<Task[]>([]);
+  const [filteredTasks, setFilteredTasks] = useState<Task[]>([]);
 
-  let filteredTasks: Task[] = [];
+  // Load tasks once on mount
+  useEffect(() => {
+    const loadTasks = async () => {
+      // Save sample data first
+      await save("Tasks", JSON.stringify(sampleTasks));
 
-  let filterTask = () => {
-    filteredTasks = sampleTasks.filter((task) => {
-      if (task.createdAt.toDateString() === selectedDate.toDateString()) {
-        return true;
+      // Then load it
+      const stored = await getValueFor("Tasks");
+      if (stored) {
+        setAllTasks(JSON.parse(stored));
       }
+    };
+
+    loadTasks();
+  }, []);
+
+  // Filter tasks whenever allTasks or selectedDate changes
+  useEffect(() => {
+    const filtered = allTasks.filter((task) => {
+      return task.createdAt === selectedDate.toDateString();
     });
-  };
-  filterTask();
+    setFilteredTasks(filtered);
+  }, [allTasks, selectedDate]);
 
   const handleDateChange = (date: Date) => {
     setSelectedDate(date);
-    filterTask();
   };
 
-  const handleIsComplete = () => {
-    console.log("Task completed!");
+  const handleIsComplete = (id: number) => {
+    const updated = allTasks.map((task) =>
+      task.id === id ? { ...task, isCompleted: !task.isCompleted } : task,
+    );
+
+    setAllTasks(updated);
+    save("Tasks", JSON.stringify(updated));
   };
 
   return (
@@ -83,7 +103,7 @@ export default function HomePage() {
                   {task.Categories ? task.Categories.join(", ") : " "}
                 </Text>
                 <Pressable
-                  onPressOut={handleIsComplete}
+                  onPressOut={() => handleIsComplete(task.id)}
                   className="border border-black h-8 w-8 rounded-full p-1 mt-2"
                 >
                   <Image
