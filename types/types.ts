@@ -1,8 +1,8 @@
 interface Task {
   id: number;
   title: string;
-  createdAt: Date;
-  postponedTo: Date | null;
+  createdAt: string;
+  postponedTo: string | null;
   emoji: string;
   color: string;
   duration: number | null;

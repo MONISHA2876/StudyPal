@@ -4,7 +4,7 @@ export const sampleTasks: Task[] = [
   {
     id: 1,
     title: "Lunch with Mom",
-    createdAt: new Date(),
+    createdAt: "Thu Feb 12 2026",
     postponedTo: null,
     emoji: "🍲",
     color: "#ECE4D7",
@@ -17,7 +17,7 @@ export const sampleTasks: Task[] = [
   {
     id: 2,
     title: "Evening Workout",
-    createdAt: new Date(),
+    createdAt: "Thu Feb 12 2026",
     postponedTo: null,
     emoji: "🏋️‍♂️",
     color: "#EBCBF4",
@@ -30,7 +30,7 @@ export const sampleTasks: Task[] = [
   {
     id: 3,
     title: "Read a Book",
-    createdAt: new Date(),
+    createdAt: "Thu Feb 12 2026",
     postponedTo: null,
     emoji: "📚",
     color: "#E1F9BB",
@@ -43,7 +43,7 @@ export const sampleTasks: Task[] = [
   {
     id: 4,
     title: "Coffee Break & Relax",
-    createdAt: new Date(),
+    createdAt: "Thu Feb 12 2026",
     postponedTo: null,
     emoji: "☕",
     color: "#9ED0E6",
@@ -56,7 +56,7 @@ export const sampleTasks: Task[] = [
   {
     id: 5,
     title: "Dinner with Sarah",
-    createdAt: new Date("2024-06-01T19:00:00"),
+    createdAt: "Wed Feb 11 2026",
     postponedTo: null,
     emoji: "🍽️",
     color: "#F9C5D1",
