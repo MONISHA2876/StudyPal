@@ -1,19 +1,14 @@
 import { getValueFor, save } from "@/database/SecureStoreFunctions";
 import { sampleTasks } from "@/test/data";
 import { Task } from "@/types/types";
+import { Link } from "expo-router";
 import { useEffect, useState } from "react";
 import { Image, Pressable, Text, View } from "react-native";
 import {
-  SafeAreaView,
-  useSafeAreaInsets,
+  SafeAreaView
 } from "react-native-safe-area-context";
+import { HookComponentTop } from "../customHooks/SafeAreaHooks";
 import HorizontalCalendar from "./HorizontalCalender";
-
-function HookComponent() {
-  const insets = useSafeAreaInsets();
-
-  return <View style={{ paddingTop: insets.top }} />;
-}
 
 export default function HomePage() {
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -59,7 +54,7 @@ export default function HomePage() {
 
   return (
     <SafeAreaView className="bg-white w-screen min-h-screen flex items-center justify-center">
-      <HookComponent />
+      <HookComponentTop />
       <View
         id="header"
         className="bg-[#E4D3F0] h-80 w-screen flex items-center justify-center"
@@ -87,17 +82,25 @@ export default function HomePage() {
               className="w-full rounded-lg p-4 flex flex-row justify-between"
               style={{ backgroundColor: task.color }}
             >
-              <View className="flex justify-start items-start gap-4">
-                <Text className="text-[#3F3939] font-normal font-md font-inter opacity-[51%]">
-                  {task.timeSlot || "Any Time"}
-                </Text>
-                <Text className="text-black font-bold font-inter font-xl">
-                  {task.emoji} {task.title}
-                </Text>
-                <Text className="text-[#3F3939] font-normal font-md font-inter opacity-[51%]">
-                  {task.duration ? `${task.duration} minutes` : "All day"}
-                </Text>
-              </View>
+              <Link
+                href={{
+                  pathname: "/task/[id]",
+                  params: { id: task.id },
+                }}
+                asChild
+              >
+                <View className="flex justify-start items-start gap-4">
+                  <Text className="text-[#3F3939] font-normal font-md font-inter opacity-[51%]">
+                    {task.timeSlot || "Any Time"}
+                  </Text>
+                  <Text className="text-black font-bold font-inter font-xl">
+                    {task.emoji} {task.title}
+                  </Text>
+                  <Text className="text-[#3F3939] font-normal font-md font-inter opacity-[51%]">
+                    {task.duration ? `${task.duration} minutes` : "All day"}
+                  </Text>
+                </View>
+              </Link>
               <View className="flex justify-start items-end">
                 <Text className="text-[#3F3939] font-normal font-md font-inter opacity-[51%]">
                   {task.Categories ? task.Categories.join(", ") : " "}

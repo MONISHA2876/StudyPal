@@ -1,5 +1,6 @@
 import { useFonts } from "expo-font";
-import { Stack } from "expo-router";
+import { Tabs } from "expo-router";
+import { StatusBar } from "react-native";
 import "./global.css";
 
 export default function RootLayout() {
@@ -10,10 +11,22 @@ export default function RootLayout() {
 
   if (!fontsLoaded) return null;
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-      }}
-    />
+    <>
+      <StatusBar barStyle="dark-content" />
+      <Tabs initialRouteName="AddTask">
+        <Tabs.Screen
+          name="index"
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Tabs.Screen
+          name="AddTask"
+          options={{
+            headerShown: false,
+          }}
+        />
+      </Tabs>
+    </>
   );
 }
