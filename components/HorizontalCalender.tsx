@@ -1,14 +1,6 @@
+import { CalendarDate } from "@/types/types";
 import { useEffect, useRef, useState } from "react";
 import { FlatList, Pressable, Text, View } from "react-native";
-
-/* --------------------------- TYPES --------------------------- */
-type CalendarDate = {
-  id: string;
-  day: string;
-  date: number;
-  isToday: boolean;
-  fullDate: Date;
-};
 
 /* --------------------------- DATE GENERATOR --------------------------- */
 const generateDatesAroundToday = (range = 14): CalendarDate[] => {

@@ -12,5 +12,18 @@ interface Task {
   isCompleted: boolean;
 }
 
-export type { Task };
+type CalendarDate = {
+  id: string;
+  day: string;
+  date: number;
+  isToday: boolean;
+  fullDate: Date;
+};
+
+type DurationOption = {
+  label: string;
+  value: number;
+};
+
+export type { CalendarDate, DurationOption, Task };
 
