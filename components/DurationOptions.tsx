@@ -1,5 +1,5 @@
 import { DurationOption } from "@/types/types";
-import { FlatList, Text, View } from "react-native";
+import { FlatList, Text, View, Pressable } from "react-native";
 
 /* --------------------------- DURATION OPTIONS --------------------------- */
 const durationOptions: DurationOption[] = [
@@ -27,7 +27,15 @@ const durationOptions: DurationOption[] = [
   { label: "8hrs", value: 480 },
 ];
 
-export default function DurationOptions() {
+interface DurationOptionsProps {
+  selectDuration: (duration: DurationOption) => void;
+  selectedDuration: number;
+}
+
+export default function DurationOptions({
+  selectDuration,
+  selectedDuration,
+}: DurationOptionsProps) {
   return (
     <View>
       <FlatList
@@ -36,11 +44,26 @@ export default function DurationOptions() {
         showsHorizontalScrollIndicator={false}
         keyExtractor={(item) => item.value.toString()}
         contentContainerStyle={{ paddingHorizontal: 1 }}
-        renderItem={({ item }) => (
-          <View className="w-[50px] h-[50px] bg-white rounded-lg mx-2 items-center justify-center">
-            <Text className="text-center font-medium">{item.label}</Text>
-          </View>
-        )}
+        renderItem={({ item }) => {
+          const isSelected = item.value === selectedDuration;
+
+          return (
+            <Pressable
+              onPress={() => selectDuration(item)}
+              className={`w-[50px] h-[50px] rounded-lg mx-2 items-center justify-center ${
+                isSelected ? "bg-purple-500" : "bg-white"
+              }`}
+            >
+              <Text
+                className={`text-center font-medium ${
+                  isSelected ? "text-white" : "text-black"
+                }`}
+              >
+                {item.label}
+              </Text>
+            </Pressable>
+          );
+        }}
       />
     </View>
   );
