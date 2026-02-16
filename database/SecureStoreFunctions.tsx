@@ -13,6 +13,21 @@ async function getValueFor(key: string) {
   return null;
 }
 
+async function saveTask(value: Task) {
+  await getValueFor("Tasks").then((res) => {
+    let tasks: Task[];
+    
+    if (res) {
+      tasks = JSON.parse(res);
+      tasks.push(value);
+    } else {
+      tasks = [value];
+    }
+    
+    save("Tasks", JSON.stringify(tasks));
+  });
+}
+
 async function taskEdit(id: number, value: any | any[], choice: number) {
   getValueFor("Tasks").then((res) => {
     if (res) {
@@ -56,7 +71,7 @@ async function taskEdit(id: number, value: any | any[], choice: number) {
   });
 }
 
-export { getValueFor, save, taskEdit };
+export { getValueFor, taskEdit, saveTask };
 
 // "Tasks" key is containing an array of all the tasks in the app.
 
