@@ -1,12 +1,9 @@
 import { getValueFor, save } from "@/database/SecureStoreFunctions";
-import { sampleTasks } from "@/test/data";
 import { Task } from "@/types/types";
-import { Link } from "expo-router";
-import { useEffect, useState } from "react";
+import { Link, useFocusEffect } from "expo-router";
+import { useEffect, useState, useCallback } from "react";
 import { Image, Pressable, Text, View } from "react-native";
-import {
-  SafeAreaView
-} from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { HookComponentTop } from "../customHooks/SafeAreaHooks";
 import HorizontalCalendar from "./HorizontalCalender";
 
@@ -15,26 +12,27 @@ export default function HomePage() {
   const [allTasks, setAllTasks] = useState<Task[]>([]);
   const [filteredTasks, setFilteredTasks] = useState<Task[]>([]);
 
-  // Load tasks once on mount
-  useEffect(() => {
-    const loadTasks = async () => {
-      // Save sample data first
-      await save("Tasks", JSON.stringify(sampleTasks));
+  useFocusEffect(
+    useCallback(() => {
+      const reloadTasks = async () => {
+        const stored = await getValueFor("Tasks");
+        if (stored) {
+          setAllTasks(JSON.parse(stored));
+        }
+      };
 
-      // Then load it
-      const stored = await getValueFor("Tasks");
-      if (stored) {
-        setAllTasks(JSON.parse(stored));
-      }
-    };
+      reloadTasks();
+    }, [])
+  );
 
-    loadTasks();
-  }, []);
-
-  // Filter tasks whenever allTasks or selectedDate changes
   useEffect(() => {
     const filtered = allTasks.filter((task) => {
-      return task.createdAt === selectedDate.toDateString();
+      // Convert both dates to same format for comparison
+      const taskDate = new Date(task.createdAt);
+      const selectedDateString = selectedDate.toDateString();
+      const taskDateString = taskDate.toDateString();
+      
+      return taskDateString === selectedDateString;
     });
     setFilteredTasks(filtered);
   }, [allTasks, selectedDate]);
@@ -45,7 +43,7 @@ export default function HomePage() {
 
   const handleIsComplete = (id: number) => {
     const updated = allTasks.map((task) =>
-      task.id === id ? { ...task, isCompleted: !task.isCompleted } : task,
+      task.id === id ? { ...task, isCompleted: !task.isCompleted } : task
     );
 
     setAllTasks(updated);
@@ -75,53 +73,64 @@ export default function HomePage() {
         id="tasksList"
         className="w-screen h-full bg-gray-100 flex items-center justify-start p-6 gap-6"
       >
-        {filteredTasks.map((task) => {
-          return (
-            <View
-              key={task.id}
-              className="w-full rounded-lg p-4 flex flex-row justify-between"
-              style={{ backgroundColor: task.color }}
-            >
-              <Link
-                href={{
-                  pathname: "/task/[id]",
-                  params: { id: task.id },
-                }}
-                asChild
+        {filteredTasks.length === 0 ? (
+          <View className="w-full p-8 flex items-center justify-center">
+            <Text className="font-inter text-lg text-gray-500 text-center">
+              🌿 No tasks for this day
+            </Text>
+            <Text className="font-inter text-sm text-gray-400 text-center mt-2">
+              Add a task to get started!
+            </Text>
+          </View>
+        ) : (
+          filteredTasks.map((task) => {
+            return (
+              <View
+                key={task.id}
+                className="w-full rounded-lg p-4 flex flex-row justify-between"
+                style={{ backgroundColor: task.color }}
               >
-                <View className="flex justify-start items-start gap-4">
-                  <Text className="text-[#3F3939] font-normal font-md font-inter opacity-[51%]">
-                    {task.timeSlot || "Any Time"}
-                  </Text>
-                  <Text className="text-black font-bold font-inter font-xl">
-                    {task.emoji} {task.title}
-                  </Text>
-                  <Text className="text-[#3F3939] font-normal font-md font-inter opacity-[51%]">
-                    {task.duration ? `${task.duration} minutes` : "All day"}
-                  </Text>
-                </View>
-              </Link>
-              <View className="flex justify-start items-end">
-                <Text className="text-[#3F3939] font-normal font-md font-inter opacity-[51%]">
-                  {task.Categories ? task.Categories.join(", ") : " "}
-                </Text>
-                <Pressable
-                  onPressOut={() => handleIsComplete(task.id)}
-                  className="border border-black h-8 w-8 rounded-full p-1 mt-2"
+                <Link
+                  href={{
+                    pathname: "/task/[id]",
+                    params: { id: task.id },
+                  }}
+                  asChild
                 >
-                  <Image
-                    source={require("../assets/images/Icons/Completed.png")}
-                    style={{
-                      width: 20,
-                      height: 20,
-                      opacity: task.isCompleted ? 1 : 0,
-                    }}
-                  />
-                </Pressable>
+                  <Pressable className="flex justify-start items-start gap-4 flex-1">
+                    <Text className="text-[#3F3939] font-normal font-md font-inter opacity-[51%]">
+                      {task.timeSlot || "Any Time"}
+                    </Text>
+                    <Text className="text-black font-bold font-inter font-xl">
+                      {task.emoji} {task.title}
+                    </Text>
+                    <Text className="text-[#3F3939] font-normal font-md font-inter opacity-[51%]">
+                      {task.duration ? `${task.duration} minutes` : "All day"}
+                    </Text>
+                  </Pressable>
+                </Link>
+                <View className="flex justify-start items-end">
+                  <Text className="text-[#3F3939] font-normal font-md font-inter opacity-[51%]">
+                    {task.Categories ? task.Categories.join(", ") : " "}
+                  </Text>
+                  <Pressable
+                    onPressOut={() => handleIsComplete(task.id)}
+                    className="border border-black h-8 w-8 rounded-full p-1 mt-2"
+                  >
+                    <Image
+                      source={require("../assets/images/Icons/Completed.png")}
+                      style={{
+                        width: 20,
+                        height: 20,
+                        opacity: task.isCompleted ? 1 : 0,
+                      }}
+                    />
+                  </Pressable>
+                </View>
               </View>
-            </View>
-          );
-        })}
+            );
+          })
+        )}
       </View>
     </SafeAreaView>
   );

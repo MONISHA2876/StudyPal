@@ -71,7 +71,7 @@ async function taskEdit(id: number, value: any | any[], choice: number) {
   });
 }
 
-export { getValueFor, taskEdit, saveTask };
+export { getValueFor,save,  taskEdit, saveTask };
 
 // "Tasks" key is containing an array of all the tasks in the app.
 

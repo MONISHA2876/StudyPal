@@ -14,6 +14,7 @@ import {
 } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { HookComponentTop } from "../customHooks/SafeAreaHooks";
+import { saveTask } from "@/database/SecureStoreFunctions";
 
 export default function AddTask() {
   const [duration, setDuration] = useState<number>(5);
@@ -45,6 +46,7 @@ export default function AddTask() {
       isCompleted: false,
     };
 
+    saveTask(newTask);
     console.log(newTask);
   };
 
