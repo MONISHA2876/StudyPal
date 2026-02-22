@@ -75,7 +75,7 @@ export default function AddTask() {
   const MID_INDEX = Math.floor(TIME_SLOTS.length / 2);
 
   const [title, setTitle] = useState("");
-  const [timeSlot, setTimeSlot] = useState<string | null>(TIME_SLOTS[MID_INDEX]);
+  const [timeSlot, setTimeSlot] = useState<string | null>(`${TIME_SLOTS[MID_INDEX]} - ${addMinutesToTime(TIME_SLOTS[MID_INDEX], duration)}`);
   const [deadline, setDeadline] = useState<string | null>(null);
   const [category, setCategory] = useState<string | null>(null);
   const [reminder, setReminder] = useState<string | null>(null);
