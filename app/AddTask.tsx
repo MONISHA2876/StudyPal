@@ -1,4 +1,5 @@
 import DurationOptions from "@/components/DurationOptions";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import { DurationOption, Task } from "@/constants/types";
 import { useState } from "react";
 import {
@@ -32,6 +33,7 @@ export default function AddTask() {
   const [category, setCategory] = useState<string | null>(null);
   const [reminder, setReminder] = useState<string | null>(null);
   const [color, setColor] = useState<string>("#EBCBF4");
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   const handleChangeDuration = (durationOp: DurationOption) => {
     setDuration(durationOp.value);
@@ -169,22 +171,49 @@ export default function AddTask() {
 
                     {/* DEADLINE */}
                     <View style={{ marginVertical: 40, gap: 10 }}>
-                      <Text className="font-inter font-bold text-lg">
-                        DEADLINE
-                      </Text>
+                      <Text className="font-inter font-bold text-lg">DEADLINE</Text>
                       <View className="h-12 flex flex-row bg-white rounded-lg items-center p-2">
-                        <Image
-                          source={require("../assets/images/Icons/Calendar_Add.png")}
-                          style={{ width: 24, height: 24 }}
-                        />
+                        <Pressable onPress={() => setShowDatePicker(true)}>
+                          <Image
+                            source={require("../assets/images/Icons/Calendar_Add.png")}
+                            style={{ width: 24, height: 24 }}
+                          />
+                        </Pressable>
                         <TextInput
                           placeholder="Select Date"
                           value={deadline || ""}
-                          onChangeText={setDeadline}
+                          onChangeText={(text) => {
+                            // Allow only digits and dashes, format as YYYY-MM-DD
+                            const cleaned = text.replace(/[^0-9]/g, "");
+                            let formatted = cleaned;
+                            if (cleaned.length >= 5) {
+                              formatted = cleaned.slice(0, 4) + "-" + cleaned.slice(4);
+                            }
+                            if (cleaned.length >= 7) {
+                              formatted = cleaned.slice(0, 4) + "-" + cleaned.slice(4, 6) + "-" + cleaned.slice(6, 8);
+                            }
+                            setDeadline(formatted.slice(0, 10));
+                          }}
+                          keyboardType="numeric"
+                          maxLength={10}
                           style={{ flex: 1, marginLeft: 10 }}
                           className="font-inter font-medium"
                         />
                       </View>
+                      {showDatePicker && (
+                        <DateTimePicker
+                          value={deadline ? new Date(deadline) : new Date()}
+                          mode="date"
+                          display="default"
+                          onChange={(event, selectedDate) => {
+                            setShowDatePicker(false);
+                            if (selectedDate) {
+                              const iso = selectedDate.toISOString().split("T")[0]; // YYYY-MM-DD
+                              setDeadline(iso);
+                            }
+                          }}
+                        />
+                      )}
                     </View>
 
                     {/* CATEGORY */}
