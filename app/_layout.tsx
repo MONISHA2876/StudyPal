@@ -24,6 +24,15 @@ export default function RootLayout() {
           name="AddTask"
           options={{
             headerShown: false,
+            tabBarStyle: { display: 'none' }
+
+          }}
+        />
+        <Tabs.Screen 
+          name="task/[id].tsx"
+          options={{
+            headerShown: false,
+            tabBarStyle: { display: 'none' },
           }}
         />
       </Tabs>

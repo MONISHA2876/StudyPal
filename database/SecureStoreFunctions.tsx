@@ -1,4 +1,4 @@
-import { Task } from "@/types/types";
+import { Task } from "@/constants/types";
 import * as SecureStore from "expo-secure-store";
 
 async function save(key: string, value: string) {
@@ -11,6 +11,21 @@ async function getValueFor(key: string) {
     return result;
   }
   return null;
+}
+
+async function saveTask(value: Task) {
+  await getValueFor("Tasks").then((res) => {
+    let tasks: Task[];
+    
+    if (res) {
+      tasks = JSON.parse(res);
+      tasks.push(value);
+    } else {
+      tasks = [value];
+    }
+    
+    save("Tasks", JSON.stringify(tasks));
+  });
 }
 
 async function taskEdit(id: number, value: any | any[], choice: number) {
@@ -56,7 +71,7 @@ async function taskEdit(id: number, value: any | any[], choice: number) {
   });
 }
 
-export { getValueFor, save, taskEdit };
+export { getValueFor,save,  taskEdit, saveTask };
 
 // "Tasks" key is containing an array of all the tasks in the app.
 
