@@ -1,5 +1,5 @@
 import DurationOptions from "@/components/DurationOptions";
-import { DurationOption, Task } from "@/types/types";
+import { DurationOption, Task } from "@/constants/types";
 import { useState } from "react";
 import {
   Image,
@@ -11,12 +11,18 @@ import {
   TouchableWithoutFeedback,
   View,
   ScrollView,
+  Pressable,
 } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { HookComponentTop } from "../customHooks/SafeAreaHooks";
 import { saveTask } from "@/database/SecureStoreFunctions";
+import { colors } from "@/constants/constants";
+import { useRouter } from "expo-router";
+
+
 
 export default function AddTask() {
+  const router = useRouter();
   const [duration, setDuration] = useState<number>(5);
 
   // NEW STATES
@@ -25,20 +31,25 @@ export default function AddTask() {
   const [deadline, setDeadline] = useState<string | null>(null);
   const [category, setCategory] = useState<string | null>(null);
   const [reminder, setReminder] = useState<string | null>(null);
+  const [color, setColor] = useState<string>("#EBCBF4");
 
   const handleChangeDuration = (durationOp: DurationOption) => {
     setDuration(durationOp.value);
   };
 
+  const handleColorChange = (choosedColor: string) =>{
+    setColor(choosedColor);
+  }
+
   // NEW FUNCTION
-  const handleAddTask = () => {
+  const handleAddTask = async () => {
     const newTask: Task = {
       id: Date.now(),
       title: title,
       createdAt: new Date().toISOString(),
       postponedTo: deadline,
       emoji: "🌱",
-      color: "#E4D3F0",
+      color: color,
       duration: duration,
       timeSlot: timeSlot,
       Categories: category ? [category] : null,
@@ -46,8 +57,9 @@ export default function AddTask() {
       isCompleted: false,
     };
 
-    saveTask(newTask);
+    await saveTask(newTask);
     console.log(newTask);
+    router.back();
   };
 
   return (
@@ -63,7 +75,7 @@ export default function AddTask() {
             <View
               style={{
                 flex: 1,
-                backgroundColor: "#E4D3F0",
+                backgroundColor: color,
                 borderTopEndRadius: 30,
                 borderTopStartRadius: 30,
               }}
@@ -76,10 +88,12 @@ export default function AddTask() {
                 <View style={{ padding: 20 }}>
                   {/* Header */}
                   <View className="flex flex-row justify-between">
+                    <Pressable onPress={() => router.back()}>
                     <Image
                       source={require("../assets/images/Icons/Cross.png")}
                       style={{ width: 30, height: 30 }}
                     />
+                    </Pressable>
                     <Text
                       onPress={handleAddTask}
                       className="font-bold font-inter"
@@ -104,6 +118,30 @@ export default function AddTask() {
                           onChangeText={setTitle}
                           className="w-full h-12 bg-white rounded-lg p-4 mt-2 font-inter font-medium"
                         />
+                      </View>
+                    </View>
+
+                    {/* COLOR */}
+                    <View style={{ marginTop: 40, gap: 10 }}>
+                      <Text className="font-inter font-bold text-lg">
+                        COLOR
+                      </Text>
+                      <View className="w-full flex flex-row justify-between">
+
+                        {colors.map((item, index)=>{
+                          return(
+                            <Pressable key={index} style={{
+                              height: 40,
+                              width: 40,
+                              borderRadius: 20,
+                              backgroundColor: item,
+                              borderColor: 'black',
+                              borderWidth: 2,
+                            }} 
+                            onPress={()=>{handleColorChange(item)}}/>
+                          )
+                        })}
+                 
                       </View>
                     </View>
 

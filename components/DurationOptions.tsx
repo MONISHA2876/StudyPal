@@ -1,4 +1,4 @@
-import { DurationOption } from "@/types/types";
+import { DurationOption } from "@/constants/types";
 import { FlatList, Text, View, Pressable } from "react-native";
 
 /* --------------------------- DURATION OPTIONS --------------------------- */

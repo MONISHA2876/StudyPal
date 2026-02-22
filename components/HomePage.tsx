@@ -1,8 +1,8 @@
 import { getValueFor, save } from "@/database/SecureStoreFunctions";
-import { Task } from "@/types/types";
+import { Task } from "@/constants/types";
 import { Link, useFocusEffect } from "expo-router";
 import { useEffect, useState, useCallback } from "react";
-import { Image, Pressable, Text, View } from "react-native";
+import { Image, Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { HookComponentTop } from "../customHooks/SafeAreaHooks";
 import HorizontalCalendar from "./HorizontalCalender";
@@ -71,8 +71,10 @@ export default function HomePage() {
 
       <View
         id="tasksList"
-        className="w-screen h-full bg-gray-100 flex items-center justify-start p-6 gap-6"
+        className="w-screen h-full bg-gray-100 items-center justify-start p-6"
       >
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <View className="w-full h-full items-center justify-start gap-6">
         {filteredTasks.length === 0 ? (
           <View className="w-full p-8 flex items-center justify-center">
             <Text className="font-inter text-lg text-gray-500 text-center">
@@ -131,6 +133,8 @@ export default function HomePage() {
             );
           })
         )}
+        </View>
+        </ScrollView>
       </View>
     </SafeAreaView>
   );

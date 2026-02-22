@@ -1,4 +1,4 @@
-import { Task } from "@/types/types";
+import { Task } from "@/constants/types";
 import * as SecureStore from "expo-secure-store";
 
 async function save(key: string, value: string) {
