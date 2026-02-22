@@ -13,7 +13,7 @@ export default function RootLayout() {
   return (
     <>
       <StatusBar barStyle="dark-content" />
-      <Tabs initialRouteName="AddTask">
+      <Tabs initialRouteName="index">
         <Tabs.Screen
           name="index"
           options={{
@@ -26,13 +26,6 @@ export default function RootLayout() {
             headerShown: false,
             tabBarStyle: { display: 'none' }
 
-          }}
-        />
-        <Tabs.Screen 
-          name="task/[id].tsx"
-          options={{
-            headerShown: false,
-            tabBarStyle: { display: 'none' },
           }}
         />
       </Tabs>

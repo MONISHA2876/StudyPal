@@ -95,7 +95,15 @@ export default function HomePage() {
                 <Link
                   href={{
                     pathname: "/task/[id]",
-                    params: { id: task.id },
+                    params: { 
+                      id:task.id,
+                      timeslot:task.timeSlot,
+                      emoji:task.emoji,
+                      title:task.title,
+                      duration:task.duration,
+                      categories:task.Categories,
+                      color: task.color,
+                     },
                   }}
                   asChild
                 >
