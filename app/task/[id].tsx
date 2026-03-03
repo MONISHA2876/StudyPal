@@ -1,5 +1,5 @@
-import { View, Text, TouchableOpacity, Animated, Easing } from "react-native";
-import { useLocalSearchParams, useFocusEffect } from "expo-router";
+import { View, Text, TouchableOpacity, Animated, Easing, Pressable } from "react-native";
+import { useLocalSearchParams, useFocusEffect, Link } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useCallback, useRef } from "react";
 
@@ -220,15 +220,20 @@ export default function TaskDetails() {
           <View className="text-[#3F3939] opacity-[51%]" style={{height:2, marginVertical: 10}} />
 
           {/* Pomodoro row */}
-          <Animated.View
-            style={{ opacity: pomodoroOpacity, transform: [{ scale: pomodoroScale }] }}
-            className="flex-row items-center gap-2"
-          >
-            <Text style={{fontSize:25, marginRight:5}}>⏱</Text>
-            <Text className="text-[#3D3048] text-2xl font-semibold font-inter tracking-tight" style={{fontSize:15}}>
-              Start Pomodoro
-            </Text>
-          </Animated.View>
+          <Link href="../Pomodoro">
+            <Animated.View
+                style={{ opacity: pomodoroOpacity, transform: [{ scale: pomodoroScale }] }}
+                className="flex-row items-center gap-2"
+            >
+                
+                <Text style={{fontSize:25, marginRight:5}}>⏱</Text>
+                <Text className="text-[#3D3048] text-2xl font-semibold font-inter tracking-tight" style={{fontSize:15}}>
+                Start Pomodoro
+                </Text>
+                
+            </Animated.View>
+            </Link>
+
         </Animated.View>
 
         {/* ── Bottom bar ── */}
