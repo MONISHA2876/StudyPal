@@ -28,6 +28,13 @@ export default function RootLayout() {
 
           }}
         />
+        <Tabs.Screen
+          name="Pomodoro"
+          options={{
+            headerShown: false,
+            tabBarStyle: { display: 'none' }
+          }}
+        />
       </Tabs>
     </>
   );
