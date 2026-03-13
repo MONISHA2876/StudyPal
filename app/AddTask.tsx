@@ -1,7 +1,7 @@
 import DurationOptions from "@/components/DurationOptions";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { DurationOption, Task } from "@/constants/types";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Image,
   Keyboard,
@@ -17,15 +17,36 @@ import {
 } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { HookComponentTop } from "../customHooks/SafeAreaHooks";
-import { saveTask } from "@/database/SecureStoreFunctions";
+import { getTask, saveTask } from "@/database/SecureStoreFunctions";
 import { colors } from "@/constants/constants";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 
+export default function AddTaskScreen() {
+  const { taskId } = useLocalSearchParams<{ taskId?: string }>();
+  const [task, setTask] = useState<Task | undefined>(undefined);
+  const [ready, setReady] = useState(!taskId); // if no taskId, ready immediately
 
+  useEffect(() => {
+    if (taskId) {
+      getTask(Number(taskId)).then((fetchedTask) => {
+        setTask(fetchedTask);
+        setReady(true);
+      });
+    }
+  }, [taskId]);
 
-export default function AddTask() {
+  if (!ready) return null; // wait for task to load before mounting form
+
+  return <AddTask key={taskId ?? "new"} task={task} />;
+}
+
+type AddTaskProps = {
+  task?: Task;
+};
+
+function AddTask({ task }: AddTaskProps) {
   const router = useRouter();
-  const [duration, setDuration] = useState<number>(5);
+  const [duration, setDuration] = useState<number>(task?.duration ?? 5);
 
   const generateTimeSlots = () => {
     const slots = [];
@@ -42,44 +63,41 @@ export default function AddTask() {
   };
 
   function addMinutesToTime(timeStr: string, minutesToAdd: number): string {
-  // "10:50 am" ko parse karo
-  const [timePart, ampm] = timeStr.trim().split(" ");
-  const [hourStr, minStr] = timePart.split(":");
+    const [timePart, ampm] = timeStr.trim().split(" ");
+    const [hourStr, minStr] = timePart.split(":");
 
-  let hours = parseInt(hourStr);
-  let minutes = parseInt(minStr);
+    let hours = parseInt(hourStr);
+    let minutes = parseInt(minStr);
 
-  // 12-hour to 24-hour convert karo
-  if (ampm.toLowerCase() === "pm" && hours !== 12) hours += 12;
-  if (ampm.toLowerCase() === "am" && hours === 12) hours = 0;
+    if (ampm.toLowerCase() === "pm" && hours !== 12) hours += 12;
+    if (ampm.toLowerCase() === "am" && hours === 12) hours = 0;
 
-  // Minutes add karo
-  const totalMinutes = hours * 60 + minutes + minutesToAdd;
+    const totalMinutes = hours * 60 + minutes + minutesToAdd;
 
-  // Wapas hours aur minutes mein convert karo
-  let newHours = Math.floor(totalMinutes / 60) % 24;
-  let newMinutes = totalMinutes % 60;
+    let newHours = Math.floor(totalMinutes / 60) % 24;
+    let newMinutes = totalMinutes % 60;
 
-  // 24-hour to 12-hour convert karo
-  const newAmpm = newHours < 12 ? "am" : "pm";
-  let displayHours = newHours % 12;
-  if (displayHours === 0) displayHours = 12;
+    const newAmpm = newHours < 12 ? "am" : "pm";
+    let displayHours = newHours % 12;
+    if (displayHours === 0) displayHours = 12;
 
-  const displayMinutes = newMinutes.toString().padStart(2, "0");
+    const displayMinutes = newMinutes.toString().padStart(2, "0");
 
-  return `${displayHours}:${displayMinutes} ${newAmpm}`;
-}
+    return `${displayHours}:${displayMinutes} ${newAmpm}`;
+  }
 
   const TIME_SLOTS = generateTimeSlots();
   const ITEM_HEIGHT = 44;
   const MID_INDEX = Math.floor(TIME_SLOTS.length / 2);
 
-  const [title, setTitle] = useState("");
-  const [timeSlot, setTimeSlot] = useState<string | null>(`${TIME_SLOTS[MID_INDEX]} - ${addMinutesToTime(TIME_SLOTS[MID_INDEX], duration)}`);
-  const [deadline, setDeadline] = useState<string | null>(null);
-  const [category, setCategory] = useState<string | null>(null);
-  const [reminder, setReminder] = useState<string | null>(null);
-  const [color, setColor] = useState<string>("#EBCBF4");
+  const [title, setTitle] = useState(task?.title ?? "");
+  const [timeSlot, setTimeSlot] = useState<string | null>(
+    task?.timeSlot ?? `${TIME_SLOTS[MID_INDEX]} - ${addMinutesToTime(TIME_SLOTS[MID_INDEX], task?.duration ?? 5)}`
+  );
+  const [deadline, setDeadline] = useState<string | null>(task?.postponedTo ?? null);
+  const [category, setCategory] = useState<string | null>(task?.Categories?.[0] ?? null);
+  const [reminder, setReminder] = useState<string | null>(task?.Reminders?.[0] ?? null);
+  const [color, setColor] = useState<string>(task?.color ?? "#EBCBF4");
   const [showDatePicker, setShowDatePicker] = useState(false);
 
   const handleChangeDuration = (durationOp: DurationOption) => {
@@ -92,9 +110,9 @@ export default function AddTask() {
 
   const handleAddTask = async () => {
     const newTask: Task = {
-      id: Date.now(),
+      id: task?.id ?? Date.now(),
       title: title,
-      createdAt: new Date().toISOString(),
+      createdAt: task?.createdAt ?? new Date().toISOString(),
       postponedTo: deadline,
       emoji: "🌱",
       color: color,
@@ -102,12 +120,15 @@ export default function AddTask() {
       timeSlot: timeSlot,
       Categories: category ? [category] : null,
       Reminders: reminder ? [reminder] : null,
-      isCompleted: false,
+      isCompleted: task?.isCompleted ?? false,
     };
-
-    await saveTask(newTask);
-    console.log(newTask);
-    router.back();
+    if (title) {
+      await saveTask(newTask);
+      console.log(newTask);
+      router.back();
+    } else {
+      alert("Please add title for your task first :)");
+    }
   };
 
   return (
@@ -269,7 +290,7 @@ export default function AddTask() {
                                       color: isSelected ? "#000" : "#999",
                                     }}
                                   >
-                                    {isSelected ? `${item} - ${addMinutesToTime(item, duration)}` : item }
+                                    {isSelected ? `${item} - ${addMinutesToTime(item, duration)}` : item}
                                   </Text>
                                 </View>
                               </Pressable>
