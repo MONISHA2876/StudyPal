@@ -1,10 +1,12 @@
 import { View, Text, TouchableOpacity, Animated, Easing, Pressable } from "react-native";
-import { useLocalSearchParams, useFocusEffect, Link } from "expo-router";
+import { useLocalSearchParams, useFocusEffect, Link, router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useCallback, useRef } from "react";
+import { deleteTask } from "@/database/SecureStoreFunctions";
+import { handleEdit } from "@/database/DatabaseFunctions";
 
 export default function TaskDetails() {
-  const { timeslot, emoji, title, duration, categories, color } =
+  const { id, timeslot, emoji, title, duration, categories, color } =
     useLocalSearchParams<{
       id?: string;
       timeslot?: string;
@@ -22,6 +24,11 @@ export default function TaskDetails() {
       return [];
     }
   })();
+
+  const handleDeleteTask = async (idOfTaskToDelete:number) =>{
+    await deleteTask(idOfTaskToDelete);
+    router.back()
+  }
 
   // ── Animated values ──────────────────────────────────────────────
   const cardSlide        = useRef(new Animated.Value(60)).current;
@@ -220,19 +227,26 @@ export default function TaskDetails() {
           <View className="text-[#3F3939] opacity-[51%]" style={{height:2, marginVertical: 10}} />
 
           {/* Pomodoro row */}
-          <Link href="../Pomodoro">
+          
+          
             <Animated.View
                 style={{ opacity: pomodoroOpacity, transform: [{ scale: pomodoroScale }] }}
                 className="flex-row items-center gap-2"
             >
-                
-                <Text style={{fontSize:25, marginRight:5}}>⏱</Text>
-                <Text className="text-[#3D3048] text-2xl font-semibold font-inter tracking-tight" style={{fontSize:15}}>
-                Start Pomodoro
-                </Text>
-                
+                <View className="flex flex-row items-center justify-between w-full">
+                  <Link href="../Pomodoro">
+                  <View className="flex flex-row gap-2 items-center">
+                    <Text style={{fontSize:25, marginRight:5}}>⏱</Text>
+                    <Text className="text-[#3D3048] text-2xl font-semibold font-inter tracking-tight" style={{fontSize:15}}>
+                    Start Pomodoro
+                    </Text>
+                  </View>
+                  </Link>
+                  <Pressable onPress={()=>handleDeleteTask(Number(id))}>
+                 <Text style={{fontSize:25, margin:5}}>🗑️</Text>
+                 </Pressable>
+                </View>
             </Animated.View>
-            </Link>
 
         </Animated.View>
 
@@ -250,6 +264,7 @@ export default function TaskDetails() {
             activeOpacity={0.85}
             style={{ backgroundColor: color}}
             className="flex-1 p-6 rounded-xl items-center justify-center shadow-lg"
+            onPress={()=>{handleEdit(Number(id), router)}}
           >
             <Text className="text-black text-base font-bold tracking-wide">
               Edit Task

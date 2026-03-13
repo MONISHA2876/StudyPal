@@ -1,3 +1,4 @@
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -8,10 +9,8 @@ import {
   Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useEffect, useRef, useState, useCallback } from "react";
 import { useFonts } from "expo-font";
 
-// ── Types ─────────────────────────────────────────────────────────────────────
 type Mode = "focus" | "short" | "long";
 
 interface ModeConfig {
@@ -25,7 +24,6 @@ interface ModeConfig {
   statusBar: "dark-content" | "light-content";
 }
 
-// ── Mode configs ───────────────────────────────────────────────────────────────
 const MODES: Record<Mode, ModeConfig> = {
   focus: {
     label: "Focus",
@@ -59,48 +57,42 @@ const MODES: Record<Mode, ModeConfig> = {
   },
 };
 
-// ── Badge images — static requires (Metro bundler requirement) ─────────────────
 const BADGE_IMAGES: Record<Mode, any> = {
   focus: require("../assets/images/Badges/focus.png"),
   short: require("../assets/images/Badges/short.png"),
-  long:  require("../assets/images/Badges/long.png"),
+  long: require("../assets/images/Badges/long.png"),
 };
 
-// ── Session sequence ───────────────────────────────────────────────────────────
 const MODE_ORDER: Mode[] = ["focus", "short", "focus", "short", "focus", "long"];
 
-// ── Helper ─────────────────────────────────────────────────────────────────────
 function pad(n: number) {
   return String(n).padStart(2, "0");
 }
 
-// ── Component ──────────────────────────────────────────────────────────────────
 export default function PomodoroTimer() {
-  // Load Oswald-Black font — place Oswald-Black.ttf in assets/fonts/
+  // FIX 1: Don't return null on font load failure — fall back to system font
   const [fontsLoaded] = useFonts({
     "Oswald-Black": require("../assets/fonts/Oswald-Black.ttf"),
   });
 
-  const [mode, setMode]         = useState<Mode>("focus");
+  const [mode, setMode] = useState<Mode>("focus");
   const [timeLeft, setTimeLeft] = useState(MODES.focus.duration);
-  const [running, setRunning]   = useState(false);
-  const [session, setSession]   = useState(1);
+  const [running, setRunning] = useState(false);
+  const [session, setSession] = useState(1);
 
-  const cfg     = MODES[mode];
+  const cfg = MODES[mode];
   const minutes = Math.floor(timeLeft / 60);
   const seconds = timeLeft % 60;
 
-  const intervalRef  = useRef<ReturnType<typeof setInterval> | null>(null);
-  const modeIdxRef   = useRef(0);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const modeIdxRef = useRef(0);
 
-  // ── Animated values ────────────────────────────────────────────────────────
-  const bgFade       = useRef(new Animated.Value(1)).current;
-  const badgeScale   = useRef(new Animated.Value(1)).current;
-  const btnScale     = useRef(new Animated.Value(1)).current;
-  const blinkAnim    = useRef(new Animated.Value(1)).current;
+  const bgFade = useRef(new Animated.Value(1)).current;
+  const badgeScale = useRef(new Animated.Value(1)).current;
+  const btnScale = useRef(new Animated.Value(1)).current;
+  const blinkAnim = useRef(new Animated.Value(1)).current;
   const blinkLoopRef = useRef<Animated.CompositeAnimation | null>(null);
 
-  // ── Blink when ≤ 10 seconds remain and timer is running ───────────────────
   useEffect(() => {
     if (timeLeft <= 10 && timeLeft > 0 && running) {
       blinkLoopRef.current = Animated.loop(
@@ -126,11 +118,10 @@ export default function PomodoroTimer() {
     }
   }, [timeLeft, running]);
 
-  // ── Mode-change animation ──────────────────────────────────────────────────
   const animateModeChange = useCallback(() => {
     Animated.sequence([
       Animated.timing(bgFade, { toValue: 0.6, duration: 150, useNativeDriver: true }),
-      Animated.timing(bgFade, { toValue: 1,   duration: 300, useNativeDriver: true }),
+      Animated.timing(bgFade, { toValue: 1, duration: 300, useNativeDriver: true }),
     ]).start();
 
     Animated.sequence([
@@ -139,30 +130,12 @@ export default function PomodoroTimer() {
     ]).start();
   }, []);
 
-  // ── Timer tick ────────────────────────────────────────────────────────────
-  useEffect(() => {
-    if (running) {
-      intervalRef.current = setInterval(() => {
-        setTimeLeft((t) => {
-          if (t <= 1) {
-            clearInterval(intervalRef.current!);
-            handleSessionEnd();
-            return 0;
-          }
-          return t - 1;
-        });
-      }, 1000);
-    } else {
-      clearInterval(intervalRef.current!);
-    }
-    return () => clearInterval(intervalRef.current!);
-  }, [running]);
-
-  // ── Session end ───────────────────────────────────────────────────────────
-  function handleSessionEnd() {
-    setRunning(false);
+  // FIX 2: Stable callback ref so interval never captures a stale version
+  const handleSessionEnd = useCallback(() => {
+    if (intervalRef.current) clearInterval(intervalRef.current);
     blinkLoopRef.current?.stop();
     blinkAnim.setValue(1);
+    setRunning(false);
 
     modeIdxRef.current = (modeIdxRef.current + 1) % MODE_ORDER.length;
     const nextMode = MODE_ORDER[modeIdxRef.current];
@@ -172,21 +145,50 @@ export default function PomodoroTimer() {
     animateModeChange();
 
     if (nextMode === "focus") setSession((s) => s + 1);
-  }
+  }, [animateModeChange]);
 
-  // ── Manual mode switch ────────────────────────────────────────────────────
+  // FIX 3: handleSessionEnd in deps; call via setTimeout to avoid setState-in-setState
+  useEffect(() => {
+    if (running) {
+      intervalRef.current = setInterval(() => {
+        setTimeLeft((t) => {
+          if (t <= 1) {
+            setTimeout(() => handleSessionEnd(), 0);
+            return 0;
+          }
+          return t - 1;
+        });
+      }, 1000);
+    } else {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    }
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, [running, handleSessionEnd]);
+
+  // FIX 4: indexOf always returns the FIRST match — find the nearest upcoming index instead
   function switchMode(newMode: Mode) {
-    clearInterval(intervalRef.current!);
+    if (intervalRef.current) clearInterval(intervalRef.current);
     blinkLoopRef.current?.stop();
     blinkAnim.setValue(1);
     setRunning(false);
     setMode(newMode);
     setTimeLeft(MODES[newMode].duration);
-    modeIdxRef.current = MODE_ORDER.indexOf(newMode);
+
+    const currentIdx = modeIdxRef.current;
+    let nextIdx = -1;
+    for (let i = 1; i <= MODE_ORDER.length; i++) {
+      const candidate = (currentIdx + i) % MODE_ORDER.length;
+      if (MODE_ORDER[candidate] === newMode) {
+        nextIdx = candidate;
+        break;
+      }
+    }
+    modeIdxRef.current = nextIdx !== -1 ? nextIdx : MODE_ORDER.indexOf(newMode);
     animateModeChange();
   }
 
-  // ── Controls ──────────────────────────────────────────────────────────────
   function togglePlay() {
     Animated.sequence([
       Animated.timing(btnScale, { toValue: 0.9, duration: 80, useNativeDriver: true }),
@@ -196,58 +198,68 @@ export default function PomodoroTimer() {
   }
 
   function skipSession() {
-    clearInterval(intervalRef.current!);
+    if (intervalRef.current) clearInterval(intervalRef.current);
     handleSessionEnd();
   }
 
   function resetTimer() {
-    clearInterval(intervalRef.current!);
+    if (intervalRef.current) clearInterval(intervalRef.current);
     blinkLoopRef.current?.stop();
     blinkAnim.setValue(1);
     setRunning(false);
     setTimeLeft(cfg.duration);
   }
 
-  const progress  = 1 - timeLeft / cfg.duration;
+  const progress = 1 - timeLeft / cfg.duration;
   const isBlinking = timeLeft <= 10 && running;
 
-  // Wait for font before rendering
-  if (!fontsLoaded) return null;
+  // FIX 5: Fallback font instead of returning null (blank screen)
+  const timerFont = fontsLoaded ? "Oswald-Black" : "System";
 
   return (
     <Animated.View style={{ flex: 1, backgroundColor: cfg.bg, opacity: bgFade }}>
       <StatusBar barStyle={cfg.statusBar} backgroundColor={cfg.bg} />
-      <SafeAreaView className="flex-1">
-        <View className="flex-1 items-center justify-between px-8 pb-4 pt-2">
-
+      <SafeAreaView style={{ flex: 1 }}>
+        <View
+          style={{
+            flex: 1,
+            alignItems: "center",
+            justifyContent: "space-between",
+            paddingHorizontal: 32,
+            paddingBottom: 16,
+            paddingTop: 8,
+          }}
+        >
           {/* ── Top: progress bar + session count ── */}
-          <View className="w-full" style={{ gap: 10 }}>
+          <View style={{ width: "100%", gap: 10 }}>
             <View
-              style={{ backgroundColor: cfg.btnBg }}
-              className="w-full h-1.5 rounded-full overflow-hidden"
+              style={{
+                backgroundColor: cfg.btnBg,
+                width: "100%",
+                height: 6,
+                borderRadius: 99,
+                overflow: "hidden",
+              }}
             >
               <View
                 style={{
                   width: `${progress * 100}%`,
                   backgroundColor: cfg.activeBtnBg,
+                  height: "100%",
+                  borderRadius: 99,
                 }}
-                className="h-full rounded-full"
               />
             </View>
 
-            <View className="w-full flex-row justify-end">
-              <Text
-                style={{ color: cfg.subText }}
-                className="text-sm font-semibold opacity-60"
-              >
+            <View style={{ width: "100%", flexDirection: "row", justifyContent: "flex-end" }}>
+              <Text style={{ color: cfg.subText, fontSize: 13, fontWeight: "600", opacity: 0.6 }}>
                 Session {session}
               </Text>
             </View>
           </View>
 
           {/* ── Centre: badge + digits + controls ── */}
-          <View className="w-full items-center" style={{ gap: 20, marginBottom:20 }}>
-
+          <View style={{ width: "100%", alignItems: "center", gap: 20, marginBottom: 20 }}>
             {/* Badge */}
             <Animated.View style={{ transform: [{ scale: badgeScale }] }}>
               <Image
@@ -258,20 +270,16 @@ export default function PomodoroTimer() {
             </Animated.View>
 
             {/* Timer digits */}
-            <View
-              className="items-center w-full"
-              style={{ gap: 0 }}
-            >
+            <View style={{ alignItems: "center", width: "100%" }}>
               <Animated.Text
                 style={{
-                  fontFamily: "Oswald-Black",
+                  fontFamily: timerFont,
                   color: cfg.text,
                   fontSize: 190,
                   lineHeight: 200,
                   letterSpacing: -4,
                   width: "100%",
                   textAlign: "center",
-                  fontVariant: ["tabular-nums"],
                   opacity: isBlinking ? blinkAnim : 1,
                 }}
               >
@@ -280,14 +288,13 @@ export default function PomodoroTimer() {
 
               <Animated.Text
                 style={{
-                  fontFamily: "Oswald-Black",
+                  fontFamily: timerFont,
                   color: cfg.subText,
                   fontSize: 190,
                   lineHeight: 200,
                   letterSpacing: -4,
                   width: "100%",
                   textAlign: "center",
-                  fontVariant: ["tabular-nums"],
                   opacity: isBlinking ? blinkAnim : 1,
                 }}
               >
@@ -296,16 +303,21 @@ export default function PomodoroTimer() {
             </View>
 
             {/* Controls */}
-            <View className="flex-row items-center gap-4">
-
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 16 }}>
               {/* Reset */}
               <TouchableOpacity
                 onPress={resetTimer}
                 activeOpacity={0.7}
-                style={{ backgroundColor: cfg.btnBg }}
-                className="w-16 h-14 rounded-2xl items-center justify-center"
+                style={{
+                  backgroundColor: cfg.btnBg,
+                  width: 64,
+                  height: 56,
+                  borderRadius: 16,
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
               >
-                <Text style={{ color: cfg.text }} className="text-xl">···</Text>
+                <Text style={{ color: cfg.text, fontSize: 20 }}>···</Text>
               </TouchableOpacity>
 
               {/* Play / Pause */}
@@ -313,10 +325,16 @@ export default function PomodoroTimer() {
                 <TouchableOpacity
                   onPress={togglePlay}
                   activeOpacity={0.85}
-                  style={{ backgroundColor: cfg.activeBtnBg }}
-                  className="w-24 h-16 rounded-3xl items-center justify-center shadow-md"
+                  style={{
+                    backgroundColor: cfg.activeBtnBg,
+                    width: 96,
+                    height: 64,
+                    borderRadius: 24,
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
                 >
-                  <Text style={{ color: cfg.text }} className="text-2xl font-bold">
+                  <Text style={{ color: cfg.text, fontSize: 24, fontWeight: "bold" }}>
                     {running ? "⏸" : "▶"}
                   </Text>
                 </TouchableOpacity>
@@ -326,17 +344,22 @@ export default function PomodoroTimer() {
               <TouchableOpacity
                 onPress={skipSession}
                 activeOpacity={0.7}
-                style={{ backgroundColor: cfg.btnBg }}
-                className="w-16 h-14 rounded-2xl items-center justify-center"
+                style={{
+                  backgroundColor: cfg.btnBg,
+                  width: 64,
+                  height: 56,
+                  borderRadius: 16,
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
               >
-                <Text style={{ color: cfg.text }} className="text-xl">⏭</Text>
+                <Text style={{ color: cfg.text, fontSize: 20 }}>⏭</Text>
               </TouchableOpacity>
-
             </View>
           </View>
 
           {/* ── Mode switcher tabs ── */}
-          <View className="flex-row gap-2">
+          <View style={{ flexDirection: "row", gap: 8 }}>
             {(["focus", "short", "long"] as Mode[]).map((m) => (
               <TouchableOpacity
                 key={m}
@@ -362,7 +385,6 @@ export default function PomodoroTimer() {
               </TouchableOpacity>
             ))}
           </View>
-
         </View>
       </SafeAreaView>
     </Animated.View>

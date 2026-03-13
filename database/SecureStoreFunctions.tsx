@@ -19,7 +19,12 @@ async function saveTask(value: Task) {
     
     if (res) {
       tasks = JSON.parse(res);
-      tasks.push(value);
+      const taskIndex = tasks.findIndex((task) => task.id === value.id);
+        if(taskIndex !== -1){
+          tasks[taskIndex] = value;
+        }else{
+          tasks.push(value);
+        }
     } else {
       tasks = [value];
     }
@@ -71,20 +76,28 @@ async function taskEdit(id: number, value: any | any[], choice: number) {
   });
 }
 
-export { getValueFor,save,  taskEdit, saveTask };
+async function getTask(id: number){
+  const res = await getValueFor("Tasks");
+
+  if (!res) return;
+
+  const tasks: Task[] = JSON.parse(res);
+  const taskIndex = tasks.findIndex((task) => task.id === id);
+  const task: Task = tasks[taskIndex]
+  return task;
+}
+
+async function deleteTask(id: number) {
+  const res = await getValueFor("Tasks");
+
+  if (!res) return;
+
+  const tasks: Task[] = JSON.parse(res);
+  const filteredTask = tasks.filter((task) => task.id !== id);
+
+  await save("Tasks", JSON.stringify(filteredTask));
+}
+
+export { getValueFor,save,  taskEdit, saveTask, deleteTask, getTask };
 
 // "Tasks" key is containing an array of all the tasks in the app.
-
-// {
-//     id: 1,       =>     We can not edit this part
-//     title: "Lunch with Mom",       =>     we can edit this part (1)
-//     createdAt: new Date(),       =>     We can not edit this part
-//     postponedTo: null,       =>     we can edit this part (2)
-//     emoji: "🍲",       =>     we can edit this part (3)
-//     color: "#ECE4D7",       =>     we can edit this part (4)
-//     duration: 30,       =>     we can edit this part (5)
-//     timeSlot: "13:30 - 14:00",       =>     we can edit this part (6)
-//     Categories: ["Family", "Health"],       =>     we can edit this part (7)
-//     Reminders: ["30 minutes before"],       =>     we can edit this part (8)
-//     isCompleted: false,       =>     we can edit this part (9)
-//   }
