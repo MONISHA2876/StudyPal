@@ -4,6 +4,7 @@ module.exports = {
   content: [
     "./app/_layout.tsx",
     "./app/index.tsx",
+    "./app/task/[id].tsx",
     "./components/**/*.{js,jsx,ts,tsx}",
   ],
   presets: [require("nativewind/preset")],

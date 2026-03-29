@@ -1,9 +1,25 @@
-import { View, Text, TouchableOpacity, Animated, Easing, Pressable } from "react-native";
-import { useLocalSearchParams, useFocusEffect, Link, router } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { useCallback, useRef } from "react";
-import { deleteTask } from "@/database/SecureStoreFunctions";
 import { handleEdit } from "@/database/DatabaseFunctions";
+import { deleteTask } from "@/database/SecureStoreFunctions";
+import {
+  Link,
+  router,
+  useFocusEffect,
+  useLocalSearchParams,
+} from "expo-router";
+import { useCallback } from "react";
+import { Pressable, Text, TouchableOpacity, View } from "react-native";
+import Animated, {
+  Easing,
+  cancelAnimation,
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withRepeat,
+  withSequence,
+  withSpring,
+  withTiming,
+} from "react-native-reanimated";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function TaskDetails() {
   const { id, timeslot, emoji, title, duration, categories, color } =
@@ -25,246 +41,257 @@ export default function TaskDetails() {
     }
   })();
 
-  const handleDeleteTask = async (idOfTaskToDelete:number) =>{
+  const safeColor = color ?? "#E8E8E8";
+
+  const handleDeleteTask = async (idOfTaskToDelete: number) => {
     await deleteTask(idOfTaskToDelete);
-    router.back()
-  }
+    router.back();
+  };
 
-  // ── Animated values ──────────────────────────────────────────────
-  const cardSlide        = useRef(new Animated.Value(60)).current;
-  const cardOpacity      = useRef(new Animated.Value(0)).current;
-  const headerScale      = useRef(new Animated.Value(0.85)).current;
-  const badgeOpacity     = useRef(new Animated.Value(0)).current;
-  const badgeSlide       = useRef(new Animated.Value(20)).current;
-  const pomodoroScale    = useRef(new Animated.Value(0.8)).current;
-  const pomodoroOpacity  = useRef(new Animated.Value(0)).current;
-  const checkPulse       = useRef(new Animated.Value(1)).current;
-  const bottomBarSlide   = useRef(new Animated.Value(80)).current;
-  const bottomBarOpacity = useRef(new Animated.Value(0)).current;
+  // ── Shared Values ─────────────────────────────────────────────
+  const cardSlide = useSharedValue(60);
+  const cardOpacity = useSharedValue(0);
+  const headerScale = useSharedValue(0.85);
+  const badgeOpacity = useSharedValue(0);
+  const badgeSlide = useSharedValue(20);
+  const pomodoroScale = useSharedValue(0.9);
+  const pomodoroOpacity = useSharedValue(0);
+  const checkPulse = useSharedValue(1);
+  const bottomBarSlide = useSharedValue(80);
+  const bottomBarOpacity = useSharedValue(0);
 
-  // Keep a ref to the loop so we can stop it on blur
-  const pulseLoop = useRef<Animated.CompositeAnimation | null>(null);
+  // ── Animated Styles ───────────────────────────────────────────
+  const cardStyle = useAnimatedStyle(() => ({
+    opacity: cardOpacity.value,
+    transform: [{ translateY: cardSlide.value }],
+  }));
 
-  // ── useFocusEffect: reset + replay every time the screen is focused ──
+  const headerStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: headerScale.value }],
+  }));
+
+  const badgeStyle = useAnimatedStyle(() => ({
+    opacity: badgeOpacity.value,
+    transform: [{ translateX: badgeSlide.value }],
+  }));
+
+  const durationStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: badgeSlide.value }],
+  }));
+
+  const pomodoroStyle = useAnimatedStyle(() => ({
+    opacity: pomodoroOpacity.value,
+    transform: [{ scale: pomodoroScale.value }],
+  }));
+
+  const checkStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: checkPulse.value }],
+  }));
+
+  const bottomBarStyle = useAnimatedStyle(() => ({
+    opacity: bottomBarOpacity.value,
+    transform: [{ translateY: bottomBarSlide.value }],
+  }));
+
+  // ── useFocusEffect ────────────────────────────────────────────
   useFocusEffect(
     useCallback(() => {
-      // 1. Reset all values to their initial (hidden) state
-      cardSlide.setValue(60);
-      cardOpacity.setValue(0);
-      headerScale.setValue(0.85);
-      badgeOpacity.setValue(0);
-      badgeSlide.setValue(20);
-      pomodoroScale.setValue(0.8);
-      pomodoroOpacity.setValue(0);
-      checkPulse.setValue(1);
-      bottomBarSlide.setValue(80);
-      bottomBarOpacity.setValue(0);
+      // Reset
+      cardSlide.value = 60;
+      cardOpacity.value = 0;
+      headerScale.value = 0.85;
+      badgeOpacity.value = 0;
+      badgeSlide.value = 20;
+      pomodoroScale.value = 0.9;
+      pomodoroOpacity.value = 0;
+      checkPulse.value = 1;
+      bottomBarSlide.value = 80;
+      bottomBarOpacity.value = 0;
 
-      // 2. Card entrance
-      Animated.parallel([
-        Animated.timing(cardSlide, {
-          toValue: 0,
-          duration: 480,
-          easing: Easing.out(Easing.cubic),
-          useNativeDriver: true,
-        }),
-        Animated.timing(cardOpacity, {
-          toValue: 1,
-          duration: 400,
-          useNativeDriver: true,
-        }),
-      ]).start();
+      // 1. Card entrance
+      cardSlide.value = withTiming(0, {
+        duration: 480,
+        easing: Easing.out(Easing.cubic),
+      });
+      cardOpacity.value = withTiming(1, { duration: 400 });
 
-      // 3. Header scale-in with spring overshoot
-      Animated.timing(headerScale, {
-        toValue: 1,
-        duration: 500,
-        delay: 100,
-        easing: Easing.out(Easing.back(1.4)),
-        useNativeDriver: true,
-      }).start();
-
-      // 4. Badges slide in from left
-      Animated.parallel([
-        Animated.timing(badgeOpacity, {
-          toValue: 1,
-          duration: 350,
-          delay: 280,
-          useNativeDriver: true,
-        }),
-        Animated.timing(badgeSlide, {
-          toValue: 0,
-          duration: 350,
-          delay: 280,
-          easing: Easing.out(Easing.cubic),
-          useNativeDriver: true,
-        }),
-      ]).start();
-
-      // 5. Pomodoro spring pop
-      Animated.parallel([
-        Animated.timing(pomodoroOpacity, {
-          toValue: 1,
-          duration: 350,
-          delay: parsedCategories.length > 0 ? 420 : 280,
-          useNativeDriver: true,
-        }),
-        Animated.spring(pomodoroScale, {
-          toValue: 1,
-          delay:  parsedCategories.length > 0 ? 420 : 280,
-          friction: 6,
-          tension: 120,
-          useNativeDriver: true,
-        }),
-      ]).start();
-
-      // 6. Bottom bar slides up
-      Animated.parallel([
-        Animated.timing(bottomBarSlide, {
-          toValue: 0,
-          duration: 450,
-          delay: 200,
-          easing: Easing.out(Easing.cubic),
-          useNativeDriver: true,
-        }),
-        Animated.timing(bottomBarOpacity, {
-          toValue: 1,
-          duration: 350,
-          delay: 200,
-          useNativeDriver: true,
-        }),
-      ]).start();
-
-      // 7. Start the infinite pulse loop on the check circle
-      pulseLoop.current = Animated.loop(
-        Animated.sequence([
-          Animated.timing(checkPulse, {
-            toValue: 1.1,
-            duration: 900,
-            easing: Easing.inOut(Easing.ease),
-            useNativeDriver: true,
-          }),
-          Animated.timing(checkPulse, {
-            toValue: 1,
-            duration: 900,
-            easing: Easing.inOut(Easing.ease),
-            useNativeDriver: true,
-          }),
-        ])
+      // 2. Header scale
+      headerScale.value = withDelay(
+        100,
+        withTiming(1, { duration: 500, easing: Easing.out(Easing.back(1.4)) }),
       );
-      pulseLoop.current.start();
 
-      // Cleanup: stop loop when screen blurs
+      // 3. Badges
+      badgeOpacity.value = withDelay(280, withTiming(1, { duration: 350 }));
+      badgeSlide.value = withDelay(
+        280,
+        withTiming(0, { duration: 350, easing: Easing.out(Easing.cubic) }),
+      );
+
+      // 4. Pomodoro
+      const pomodoroDelay = parsedCategories.length > 0 ? 420 : 280;
+      pomodoroOpacity.value = withDelay(
+        pomodoroDelay,
+        withTiming(1, { duration: 350 }),
+      );
+      pomodoroScale.value = withDelay(
+        pomodoroDelay,
+        withSpring(1, { damping: 10, stiffness: 120 }),
+      );
+
+      // 5. Bottom bar
+      bottomBarSlide.value = withDelay(
+        200,
+        withTiming(0, { duration: 450, easing: Easing.out(Easing.cubic) }),
+      );
+      bottomBarOpacity.value = withDelay(200, withTiming(1, { duration: 350 }));
+
+      // 6. Pulse loop
+      checkPulse.value = withRepeat(
+        withSequence(
+          withTiming(1.1, { duration: 900, easing: Easing.inOut(Easing.ease) }),
+          withTiming(1, { duration: 900, easing: Easing.inOut(Easing.ease) }),
+        ),
+        -1, // infinite
+        false,
+      );
+
       return () => {
-        pulseLoop.current?.stop();
+        cancelAnimation(checkPulse);
       };
-    }, [])
+    }, []),
   );
 
   return (
     <SafeAreaView className="flex-1 bg-white">
-      <View className="flex-1 px-4 pt-4 pb-6 justify-center items-baseline gap-4">
-
+      <View className="flex-1 px-4 pt-4 pb-6 justify-center items-stretch gap-4">
         {/* ── Card ── */}
         <Animated.View
-          style={{ opacity: cardOpacity, transform: [{ translateY: cardSlide }], backgroundColor: color, width:"100%" }}
-          className=" rounded-lg p-6 shadow-2xl flex gap-4"
+          style={[cardStyle, { backgroundColor: safeColor, width: "100%" }]}
+          className="rounded-lg p-6 shadow-2xl flex gap-4"
         >
           {/* Timeslot */}
-          <Text className="text-[#3F3939] font-normal font-md font-inter opacity-[51%] tracking-widest mb-3">
+          <Text className="text-[#3F3939] font-normal font-inter opacity-[51%] tracking-widest mb-3">
             {timeslot || "Any Time"}
           </Text>
 
           {/* Title row */}
           <Animated.View
-            style={{ transform: [{ scale: headerScale }] }}
+            style={headerStyle}
             className="flex-row items-center mb-3"
           >
-            <Text className="font-bold font-inter font-2xl" style={{fontSize:20, marginRight:4}}>{emoji ?? "🍜"}</Text>
-
             <Text
-              className="flex-1 text-black font-bold font-inter font-2xl leading-7"
+              className="font-bold font-inter"
+              style={{ fontSize: 20, marginRight: 4 }}
+            >
+              {emoji ?? "🍜"}
+            </Text>
+            <Text
+              className="flex-1 text-black font-bold font-inter leading-7"
               numberOfLines={2}
-              style={{fontSize:20}}
+              style={{ fontSize: 20 }}
             >
               {title}
             </Text>
-
           </Animated.View>
 
           {/* Duration */}
           <Animated.Text
-            style={{ transform: [{ translateX: badgeSlide }] }}
-            className="text-[#3F3939] font-normal font-md font-inter opacity-[51%] tracking-wide mb-3"
+            style={[
+              durationStyle,
+              {
+                color: "#3F3939",
+                opacity: 0.51,
+                letterSpacing: 1,
+              },
+            ]}
           >
-            {duration ? `${duration} minutes` : "All day"}
+            <Text className="text-[#3F3939] font-normal font-inter opacity-[51%] tracking-widest mb-3">
+              {duration ? `${duration} minutes` : "All day"}
+            </Text>
           </Animated.Text>
 
           {/* Category badges */}
           <Animated.View
-            style={{ opacity: badgeOpacity, transform: [{ translateX: badgeSlide }] }}
-            className="flex-row flex-wrap gap-2 mb-5"
+            style={[
+              badgeStyle,
+              {
+                flexDirection: "row",
+                flexWrap: "wrap",
+                gap: 8,
+                marginBottom: 20,
+              },
+            ]}
           >
-            {(parsedCategories.length > 0 ? parsedCategories : []).map(
-              (cat: string, i: number) => (
-                <View
-                  key={i}
-                  style={{ backgroundColor: color + "28" }}
-                  className="px-3 py-1.5 rounded-full"
+            {parsedCategories.map((cat: string, i: number) => (
+              <View
+                key={i}
+                style={{ backgroundColor: safeColor + "28" }}
+                className="px-3 py-1.5 rounded-full"
+              >
+                <Text
+                  style={{ color: safeColor }}
+                  className="text-xs font-semibold tracking-wide"
                 >
-                  <Text
-                    style={{ color: color }}
-                    className="text-xs font-semibold tracking-wide"
-                  >
-                    {cat}
-                  </Text>
-                </View>
-              )
-            )}
+                  {cat}
+                </Text>
+              </View>
+            ))}
           </Animated.View>
 
           {/* Divider */}
-          <View className="text-[#3F3939] opacity-[51%]" style={{height:2, marginVertical: 10}} />
+          <View
+            style={{
+              height: 2,
+              marginVertical: 10,
+              backgroundColor: "#3F3939",
+              opacity: 0.15,
+            }}
+          />
 
           {/* Pomodoro row */}
-          
-          
-            <Animated.View
-                style={{ opacity: pomodoroOpacity, transform: [{ scale: pomodoroScale }] }}
-                className="flex-row items-center gap-2"
-            >
-                <View className="flex flex-row items-center justify-between w-full">
-                  <Link href="../Pomodoro">
-                  <View className="flex flex-row gap-2 items-center">
-                    <Text style={{fontSize:25, marginRight:5}}>⏱</Text>
-                    <Text className="text-[#3D3048] text-2xl font-semibold font-inter tracking-tight" style={{fontSize:15}}>
+          <Animated.View
+            style={[
+              pomodoroStyle,
+              { flexDirection: "row", alignItems: "center" },
+            ]}
+          >
+            <View className="flex flex-row items-center justify-between w-full">
+              <Link href="../Pomodoro">
+                <View className="flex flex-row gap-2 items-center">
+                  <Text style={{ fontSize: 25, marginRight: 5 }}>⏱</Text>
+                  <Text
+                    className="text-[#3D3048] font-semibold font-inter"
+                    style={{ fontSize: 15 }}
+                  >
                     Start Pomodoro
-                    </Text>
-                  </View>
-                  </Link>
-                  <Pressable onPress={()=>handleDeleteTask(Number(id))}>
-                 <Text style={{fontSize:25, margin:5}}>🗑️</Text>
-                 </Pressable>
+                  </Text>
                 </View>
-            </Animated.View>
-
+              </Link>
+              <Pressable onPress={() => handleDeleteTask(Number(id))}>
+                <Text style={{ fontSize: 25, margin: 5 }}>🗑️</Text>
+              </Pressable>
+            </View>
+          </Animated.View>
         </Animated.View>
 
         {/* ── Bottom bar ── */}
         <Animated.View
-          style={{
-            opacity: bottomBarOpacity,
-            transform: [{ translateY: bottomBarSlide }],
-          }}
-          className="flex-row items-center gap-3 pt-4"
+          style={[
+            bottomBarStyle,
+            {
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 12,
+              paddingTop: 16,
+            },
+          ]}
         >
-
-          {/* Edit Task button */}
           <TouchableOpacity
             activeOpacity={0.85}
-            style={{ backgroundColor: color}}
+            style={{ backgroundColor: safeColor }}
             className="flex-1 p-6 rounded-xl items-center justify-center shadow-lg"
-            onPress={()=>{handleEdit(Number(id), router)}}
+            onPress={() => handleEdit(Number(id), router)}
           >
             <Text className="text-black text-base font-bold tracking-wide">
               Edit Task

@@ -1,10 +1,9 @@
-import { getValueFor, save } from "@/database/SecureStoreFunctions";
 import { Task } from "@/constants/types";
+import { getValueFor, save } from "@/database/SecureStoreFunctions";
 import { Link, useFocusEffect } from "expo-router";
-import { useEffect, useState, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Image, Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { HookComponentTop } from "../customHooks/SafeAreaHooks";
 import HorizontalCalendar from "./HorizontalCalender";
 
 export default function HomePage() {
@@ -22,7 +21,7 @@ export default function HomePage() {
       };
 
       reloadTasks();
-    }, [])
+    }, []),
   );
 
   useEffect(() => {
@@ -31,7 +30,7 @@ export default function HomePage() {
       const taskDate = new Date(task.createdAt);
       const selectedDateString = selectedDate.toDateString();
       const taskDateString = taskDate.toDateString();
-      
+
       return taskDateString === selectedDateString;
     });
     setFilteredTasks(filtered);
@@ -43,7 +42,7 @@ export default function HomePage() {
 
   const handleIsComplete = (id: number) => {
     const updated = allTasks.map((task) =>
-      task.id === id ? { ...task, isCompleted: !task.isCompleted } : task
+      task.id === id ? { ...task, isCompleted: !task.isCompleted } : task,
     );
 
     setAllTasks(updated);
@@ -51,12 +50,15 @@ export default function HomePage() {
   };
 
   return (
-    <SafeAreaView className="bg-white w-screen min-h-screen flex items-center justify-center">
-      <HookComponentTop />
+    <SafeAreaView
+      className="bg-[#E4D3F0] w-screen min-h-screen flex flex-col items-center justify-start"
+      style={{ padding: 0, margin: 0 }}
+      edges={["bottom", "left", "right"]}
+    >
       <View
         id="header"
-        className="bg-[#E4D3F0] h-80 w-screen flex items-center justify-center"
-        style={{ paddingTop: 100 }}
+        className="bg-[#E4D3F0] w-screen flex items-center justify-center"
+        style={{ margin: 0, paddingTop: 40 }}
       >
         <Text className="font-pompiere text-4xl font-thin w-full text-center p-2 px-4">
           Today
@@ -71,77 +73,86 @@ export default function HomePage() {
 
       <View
         id="tasksList"
-        className="w-screen h-full bg-gray-100 items-center justify-start p-6"
+        className=" bg-gray-100 items-center justify-start p-6"
+        style={{ flex: 1, width: "100%" }}
       >
-        <ScrollView showsVerticalScrollIndicator={false}>
-          <View className="w-full h-full items-center justify-start gap-6">
-        {filteredTasks.length === 0 ? (
-          <View className="w-full p-8 flex items-center justify-center">
-            <Text className="font-inter text-lg text-gray-500 text-center">
-              🌿 No tasks for this day
-            </Text>
-            <Text className="font-inter text-sm text-gray-400 text-center mt-2">
-              Add a task to get started!
-            </Text>
-          </View>
-        ) : (
-          filteredTasks.map((task) => {
-            return (
-              <View
-                key={task.id}
-                className="w-full rounded-lg p-4 flex flex-row justify-between"
-                style={{ backgroundColor: task.color }}
-              >
-                <Link
-                  href={{
-                    pathname: "/task/[id]",
-                    params: { 
-                      id:task.id,
-                      timeslot:task.timeSlot,
-                      emoji:task.emoji,
-                      title:task.title,
-                      duration:task.duration,
-                      categories:task.Categories,
-                      color: task.color,
-                     },
-                  }}
-                  asChild
-                >
-                  <Pressable className="flex justify-start items-start gap-4 flex-1">
-                    <Text className="text-[#3F3939] font-normal font-md font-inter opacity-[51%]">
-                      {task.timeSlot || "Any Time"}
-                    </Text>
-                    <Text className="text-black font-bold font-inter font-xl">
-                      {task.emoji} {task.title}
-                    </Text>
-                    <Text className="text-[#3F3939] font-normal font-md font-inter opacity-[51%]">
-                      {task.duration ? `${task.duration} minutes` : "All day"}
-                    </Text>
-                  </Pressable>
-                </Link>
-                <View className="flex justify-start items-end">
-                  <Text className="text-[#3F3939] font-normal font-md font-inter opacity-[51%]">
-                    {task.Categories ? task.Categories.join(", ") : " "}
-                  </Text>
-                  <Pressable
-                    onPressOut={() => handleIsComplete(task.id)}
-                    className="border border-black h-8 w-8 rounded-full p-1 mt-2"
-                  >
-                    <Image
-                      source={require("../assets/images/Icons/Completed.png")}
-                      style={{
-                        width: 20,
-                        height: 20,
-                        opacity: task.isCompleted ? 1 : 0,
-                      }}
-                    />
-                  </Pressable>
-                </View>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          style={{ width: "100%" }}
+        >
+          <View
+            className="w-full items-center justify-start gap-6"
+            style={{ flex: 1, paddingBottom: 100 }}
+          >
+            {filteredTasks.length === 0 ? (
+              <View className="w-full p-8 flex items-center justify-center">
+                <Text className="font-inter text-lg text-gray-500 text-center">
+                  🌿 No tasks for this day
+                </Text>
+                <Text className="font-inter text-sm text-gray-400 text-center mt-2">
+                  Add a task to get started!
+                </Text>
               </View>
-            );
-          })
-        )}
-        </View>
+            ) : (
+              filteredTasks.map((task) => {
+                return (
+                  <View
+                    key={task.id}
+                    className="w-full rounded-lg p-4 flex flex-row justify-between"
+                    style={{ backgroundColor: task.color }}
+                  >
+                    <Link
+                      href={{
+                        pathname: "/task/[id]",
+                        params: {
+                          id: task.id,
+                          timeslot: task.timeSlot,
+                          emoji: task.emoji,
+                          title: task.title,
+                          duration: task.duration,
+                          categories: task.Categories,
+                          color: task.color,
+                        },
+                      }}
+                      asChild
+                    >
+                      <Pressable className="flex justify-start items-start gap-4 flex-1">
+                        <Text className="text-[#3F3939] font-normal font-md font-inter opacity-[51%]">
+                          {task.timeSlot || "Any Time"}
+                        </Text>
+                        <Text className="text-black font-bold font-inter font-xl">
+                          {task.emoji} {task.title}
+                        </Text>
+                        <Text className="text-[#3F3939] font-normal font-md font-inter opacity-[51%]">
+                          {task.duration
+                            ? `${task.duration} minutes`
+                            : "All day"}
+                        </Text>
+                      </Pressable>
+                    </Link>
+                    <View className="flex justify-start items-end">
+                      <Text className="text-[#3F3939] font-normal font-md font-inter opacity-[51%]">
+                        {task.Categories ? task.Categories.join(", ") : " "}
+                      </Text>
+                      <Pressable
+                        onPressOut={() => handleIsComplete(task.id)}
+                        className="border border-black h-8 w-8 rounded-full p-1 mt-2"
+                      >
+                        <Image
+                          source={require("../assets/images/Icons/Completed.png")}
+                          style={{
+                            width: 20,
+                            height: 20,
+                            opacity: task.isCompleted ? 1 : 0,
+                          }}
+                        />
+                      </Pressable>
+                    </View>
+                  </View>
+                );
+              })
+            )}
+          </View>
         </ScrollView>
       </View>
     </SafeAreaView>
