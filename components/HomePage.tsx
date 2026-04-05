@@ -63,9 +63,6 @@ export default function HomePage() {
         <Text className="font-pompiere text-4xl font-thin w-full text-center p-2 px-4">
           Today
         </Text>
-        <Text className="font-inter text-md font-bold w-full text-center pb-2 px-4">
-          🌱 Trust the Process, Trust Yourself
-        </Text>
         <View id="calendar" className="w-full">
           <HorizontalCalendar onDateChange={handleDateChange} />
         </View>

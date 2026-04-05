@@ -1,3 +1,4 @@
+import CustomTabBar from "@/components/TabBar";
 import { useFonts } from "expo-font";
 import { Tabs } from "expo-router";
 import { StatusBar } from "react-native";
@@ -13,28 +14,15 @@ export default function RootLayout() {
   return (
     <>
       <StatusBar barStyle="dark-content" />
-      <Tabs initialRouteName="index">
-        <Tabs.Screen
-          name="index"
-          options={{
-            headerShown: false,
-          }}
-        />
-        <Tabs.Screen
-          name="AddTask"
-          options={{
-            headerShown: false,
-            tabBarStyle: { display: 'none' }
-
-          }}
-        />
-        <Tabs.Screen
-          name="Pomodoro"
-          options={{
-            headerShown: false,
-            tabBarStyle: { display: 'none' }
-          }}
-        />
+      <Tabs
+        tabBar={(props) => <CustomTabBar {...props} />}
+        screenOptions={{ headerShown: false }}
+        initialRouteName="index"
+      >
+        <Tabs.Screen name="index" />
+        <Tabs.Screen name="AddTask" />
+        <Tabs.Screen name="Pomodoro" />
+        <Tabs.Screen name="task/[id]" />
       </Tabs>
     </>
   );
