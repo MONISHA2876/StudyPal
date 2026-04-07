@@ -10,7 +10,6 @@ StudyPal helps you organize daily tasks, beat procrastination with Pomodoro time
 [![Expo](https://img.shields.io/badge/Expo-SDK%2053-000020?style=flat-square&logo=expo)](https://expo.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-82.5%25-3178C6?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
 [![NativeWind](https://img.shields.io/badge/NativeWind-v4-38BDF8?style=flat-square&logo=tailwindcss)](https://www.nativewind.dev/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
 
 </div>
 
@@ -125,26 +124,6 @@ StudyPal features a custom floating tab bar with:
 - **Purple active state** tinting for selected tab icons
 - A **card-style bottom nav** with rounded corners and a soft shadow
 - Smooth `activeOpacity` press feedback on all interactive elements
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! To get started:
-
-1. Fork the repository
-2. Create a new branch: `git checkout -b feature/your-feature-name`
-3. Make your changes and commit: `git commit -m "feat: add your feature"`
-4. Push to your branch: `git push origin feature/your-feature-name`
-5. Open a Pull Request
-
-Please keep code clean, typed, and consistent with the existing style.
-
----
-
-## 📄 License
-
-This project is licensed under the [MIT License](LICENSE).
 
 ---
 
