@@ -1,7 +1,7 @@
-import CustomTabBar from "@/components/TabBar";
+import TabBar from "@/components/TabBar";
 import { useFonts } from "expo-font";
-import { Tabs } from "expo-router";
-import { StatusBar } from "react-native";
+import { Slot } from "expo-router";
+import { View } from "react-native";
 import "./global.css";
 
 export default function RootLayout() {
@@ -13,17 +13,13 @@ export default function RootLayout() {
   if (!fontsLoaded) return null;
   return (
     <>
-      <StatusBar barStyle="dark-content" />
-      <Tabs
-        tabBar={(props) => <CustomTabBar {...props} />}
-        screenOptions={{ headerShown: false }}
-        initialRouteName="index"
-      >
-        <Tabs.Screen name="index" />
-        <Tabs.Screen name="AddTask" />
-        <Tabs.Screen name="Pomodoro" />
-        <Tabs.Screen name="task/[id]" />
-      </Tabs>
+      <View className="flex-1 bg-[#F5F0FF]">
+        {/* Active screen content */}
+        <Slot />
+
+        {/* Floating custom tab bar */}
+        <TabBar />
+      </View>
     </>
   );
 }
