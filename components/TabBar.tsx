@@ -26,7 +26,7 @@ export default function TabBar() {
      * Outer wrapper — floats above the bottom edge.
      * pb-safe respects the device home-indicator inset (NativeWind v4).
      */
-    <View className="absolute bottom-4 left-4 right-4 items-center pb-safe">
+    <View className="absolute bottom-0 left-4 right-4 items-center pb-safe">
       {/* Card shell */}
       <View className="flex-row items-center bg-white rounded-full px-6 py-3 shadow-lg shadow-black/10 w-full justify-between">
         {/* Left two tabs */}
@@ -40,7 +40,7 @@ export default function TabBar() {
         ))}
 
         {/* FAB placeholder — the floating "+" button sits above this gap */}
-        <View className="w-14" />
+        <View className="w-16" />
 
         {/* Right two tabs */}
         {TABS.slice(2).map(({ icon, route }) => (
@@ -57,11 +57,11 @@ export default function TabBar() {
       <TouchableOpacity
         onPress={() => router.push("/AddTask" as Href)}
         activeOpacity={0.85}
-        className="absolute -top-6 w-14 h-14 rounded-full bg-[#F4635A] items-center justify-center shadow-md shadow-black/25"
+        className="absolute -top-6 w-16 h-16 rounded-full bg-[#F4635A] items-center justify-center shadow-md shadow-black/25"
       >
         {/* "+" drawn with two plain Views — no icon library needed */}
-        <View className="w-6 h-[2px] bg-white absolute" />
-        <View className="w-[2px] h-6 bg-white absolute" />
+        <View className="w-7 h-[2px] bg-white absolute" />
+        <View className="w-[2px] h-7 bg-white absolute" />
       </TouchableOpacity>
     </View>
   );
@@ -81,7 +81,7 @@ function TabButton({
     <TouchableOpacity onPress={onPress} activeOpacity={0.7} className="p-2">
       <Image
         source={icon}
-        className="w-6 h-6"
+        className="w-7 h-7"
         style={{ tintColor: active ? "#6B4EFF" : "#9CA3AF" }}
         resizeMode="contain"
       />

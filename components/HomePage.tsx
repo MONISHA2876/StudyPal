@@ -53,7 +53,7 @@ export default function HomePage() {
     <SafeAreaView
       className="bg-[#E4D3F0] w-screen min-h-screen flex flex-col items-center justify-start"
       style={{ padding: 0, margin: 0 }}
-      edges={["bottom", "left", "right"]}
+      edges={["left", "right"]}
     >
       <View
         id="header"
@@ -63,6 +63,9 @@ export default function HomePage() {
         <Text className="font-pompiere text-4xl font-thin w-full text-center p-2 px-4">
           Today
         </Text>
+        <Link href="/settings" asChild>
+          <Text className="absolute right-4 top-12 text-2xl">⚙️</Text>
+        </Link>
         <View id="calendar" className="w-full">
           <HorizontalCalendar onDateChange={handleDateChange} />
         </View>
