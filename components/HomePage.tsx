@@ -1,3 +1,4 @@
+import { useTheme } from "@/constants/ThemeContext";
 import { Task } from "@/constants/types";
 import { getValueFor, save } from "@/database/SecureStoreFunctions";
 import { Link, useFocusEffect } from "expo-router";
@@ -7,6 +8,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import HorizontalCalendar from "./HorizontalCalender";
 
 export default function HomePage() {
+  //@ts-ignore
+  const { theme } = useTheme();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [allTasks, setAllTasks] = useState<Task[]>([]);
   const [filteredTasks, setFilteredTasks] = useState<Task[]>([]);
@@ -51,13 +54,13 @@ export default function HomePage() {
 
   return (
     <SafeAreaView
-      className="bg-[#E4D3F0] w-screen min-h-screen flex flex-col items-center justify-start"
+      className={`${theme.background} w-screen min-h-screen flex flex-col items-center justify-start`}
       style={{ padding: 0, margin: 0 }}
       edges={["left", "right"]}
     >
       <View
         id="header"
-        className="bg-[#E4D3F0] w-screen flex items-center justify-center"
+        className={`${theme.surface} w-screen flex items-center justify-center`}
         style={{ margin: 0, paddingTop: 40 }}
       >
         <Text className="font-pompiere text-4xl font-thin w-full text-center p-2 px-4">
