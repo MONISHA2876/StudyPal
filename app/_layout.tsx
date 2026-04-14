@@ -1,4 +1,5 @@
 import TabBar from "@/components/TabBar";
+import { ThemeProvider } from "@/constants/ThemeContext";
 import { useFonts } from "expo-font";
 import { Slot } from "expo-router";
 import { View } from "react-native";
@@ -13,13 +14,12 @@ export default function RootLayout() {
   if (!fontsLoaded) return null;
   return (
     <>
-      <View className="flex-1 bg-[#F5F0FF]">
-        {/* Active screen content */}
-        <Slot />
-
-        {/* Floating custom tab bar */}
-        <TabBar />
-      </View>
+      <ThemeProvider>
+        <View className="flex-1 bg-[#F5F0FF]">
+          <Slot />
+          <TabBar />
+        </View>
+      </ThemeProvider>
     </>
   );
 }

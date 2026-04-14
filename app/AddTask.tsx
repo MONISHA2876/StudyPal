@@ -1,30 +1,31 @@
 import DurationOptions from "@/components/DurationOptions";
-import DateTimePicker from "@react-native-community/datetimepicker";
+import { colors } from "@/constants/constants";
+import { useTheme } from "@/constants/ThemeContext";
 import { DurationOption, Task } from "@/constants/types";
+import { getTask, saveTask } from "@/database/SecureStoreFunctions";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
+  FlatList,
   Image,
   Keyboard,
-  Text,
-  TextInput,
   KeyboardAvoidingView,
   Platform,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
   TouchableWithoutFeedback,
   View,
-  ScrollView,
-  Pressable,
-  FlatList
 } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { HookComponentTop } from "../customHooks/SafeAreaHooks";
-import { getTask, saveTask } from "@/database/SecureStoreFunctions";
-import { colors } from "@/constants/constants";
-import { useLocalSearchParams, useRouter } from "expo-router";
 
 export default function AddTaskScreen() {
   const { taskId } = useLocalSearchParams<{ taskId?: string }>();
   const [task, setTask] = useState<Task | undefined>(undefined);
-  const [ready, setReady] = useState(!taskId); // if no taskId, ready immediately
+  const [ready, setReady] = useState(!taskId);
 
   useEffect(() => {
     if (taskId) {
@@ -35,7 +36,7 @@ export default function AddTaskScreen() {
     }
   }, [taskId]);
 
-  if (!ready) return null; // wait for task to load before mounting form
+  if (!ready) return null;
 
   return <AddTask key={taskId ?? "new"} task={task} />;
 }
@@ -45,6 +46,8 @@ type AddTaskProps = {
 };
 
 function AddTask({ task }: AddTaskProps) {
+  //@ts-ignore
+  const { theme } = useTheme();
   const router = useRouter();
   const [duration, setDuration] = useState<number>(task?.duration ?? 5);
 
@@ -92,11 +95,18 @@ function AddTask({ task }: AddTaskProps) {
 
   const [title, setTitle] = useState(task?.title ?? "");
   const [timeSlot, setTimeSlot] = useState<string | null>(
-    task?.timeSlot ?? `${TIME_SLOTS[MID_INDEX]} - ${addMinutesToTime(TIME_SLOTS[MID_INDEX], task?.duration ?? 5)}`
+    task?.timeSlot ??
+      `${TIME_SLOTS[MID_INDEX]} - ${addMinutesToTime(TIME_SLOTS[MID_INDEX], task?.duration ?? 5)}`,
   );
-  const [deadline, setDeadline] = useState<string | null>(task?.postponedTo ?? null);
-  const [category, setCategory] = useState<string | null>(task?.Categories?.[0] ?? null);
-  const [reminder, setReminder] = useState<string | null>(task?.Reminders?.[0] ?? null);
+  const [deadline, setDeadline] = useState<string | null>(
+    task?.postponedTo ?? null,
+  );
+  const [category, setCategory] = useState<string | null>(
+    task?.Categories?.[0] ?? null,
+  );
+  const [reminder, setReminder] = useState<string | null>(
+    task?.Reminders?.[0] ?? null,
+  );
   const [color, setColor] = useState<string>(task?.color ?? "#EBCBF4");
   const [showDatePicker, setShowDatePicker] = useState(false);
 
@@ -132,7 +142,7 @@ function AddTask({ task }: AddTaskProps) {
   };
 
   return (
-    <SafeAreaProvider>
+    <SafeAreaProvider style={{ flex: 1, backgroundColor: theme.surface }}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1 }}
@@ -144,7 +154,7 @@ function AddTask({ task }: AddTaskProps) {
             <View
               style={{
                 flex: 1,
-                backgroundColor: color,
+                backgroundColor: theme.background,
                 borderTopEndRadius: 30,
                 borderTopStartRadius: 30,
               }}
@@ -161,13 +171,13 @@ function AddTask({ task }: AddTaskProps) {
                     <Pressable onPress={() => router.back()}>
                       <Image
                         source={require("../assets/images/Icons/Cross.png")}
-                        style={{ width: 30, height: 30 }}
+                        style={{ width: 30, height: 30, tintColor: theme.text }}
                       />
                     </Pressable>
                     <Text
                       onPress={handleAddTask}
                       className="font-bold font-inter"
-                      style={{ fontSize: 15 }}
+                      style={{ fontSize: 15, color: theme.text }}
                     >
                       Add Task
                     </Text>
@@ -179,21 +189,32 @@ function AddTask({ task }: AddTaskProps) {
                       <Text style={{ margin: 10, fontSize: 40 }}>🌱</Text>
 
                       <View style={{ flex: 1 }}>
-                        <Text className="font-inter font-bold text-lg">
+                        <Text
+                          className="font-inter font-bold text-lg"
+                          style={{ color: theme.text }}
+                        >
                           TITLE
                         </Text>
                         <TextInput
                           placeholder="Task Title"
+                          placeholderTextColor={theme.textMuted}
                           value={title}
                           onChangeText={setTitle}
-                          className="w-full h-12 bg-white rounded-lg p-4 mt-2 font-inter font-medium"
+                          className="w-full h-12 rounded-lg p-4 mt-2 font-inter font-medium"
+                          style={{
+                            backgroundColor: theme.surface,
+                            color: theme.text,
+                          }}
                         />
                       </View>
                     </View>
 
                     {/* COLOR */}
                     <View style={{ marginTop: 40, gap: 10 }}>
-                      <Text className="font-inter font-bold text-lg">
+                      <Text
+                        className="font-inter font-bold text-lg"
+                        style={{ color: theme.text }}
+                      >
                         COLOR
                       </Text>
                       <View className="w-full flex flex-row justify-between">
@@ -206,10 +227,12 @@ function AddTask({ task }: AddTaskProps) {
                                 width: 40,
                                 borderRadius: 20,
                                 backgroundColor: item,
-                                borderColor: "black",
+                                borderColor: theme.border,
                                 borderWidth: 2,
                               }}
-                              onPress={() => { handleColorChange(item); }}
+                              onPress={() => {
+                                handleColorChange(item);
+                              }}
                             />
                           );
                         })}
@@ -218,7 +241,10 @@ function AddTask({ task }: AddTaskProps) {
 
                     {/* DURATION */}
                     <View style={{ marginVertical: 40, gap: 10 }}>
-                      <Text className="font-inter font-bold text-lg">
+                      <Text
+                        className="font-inter font-bold text-lg"
+                        style={{ color: theme.text }}
+                      >
                         DURATION
                       </Text>
                       <DurationOptions
@@ -229,11 +255,16 @@ function AddTask({ task }: AddTaskProps) {
 
                     {/* WHEN */}
                     <View>
-                      <Text className="font-inter font-bold text-lg">WHEN</Text>
+                      <Text
+                        className="font-inter font-bold text-lg"
+                        style={{ color: theme.text }}
+                      >
+                        WHEN
+                      </Text>
                       <View
                         style={{
                           height: ITEM_HEIGHT * 3,
-                          backgroundColor: "white",
+                          backgroundColor: theme.surface,
                           borderRadius: 16,
                           marginTop: 8,
                           overflow: "hidden",
@@ -255,9 +286,12 @@ function AddTask({ task }: AddTaskProps) {
                           })}
                           onScroll={(e) => {
                             const index = Math.round(
-                              (e.nativeEvent.contentOffset.y / ITEM_HEIGHT) + 1
+                              e.nativeEvent.contentOffset.y / ITEM_HEIGHT + 1,
                             );
-                            if (TIME_SLOTS[index] && TIME_SLOTS[index] !== timeSlot) {
+                            if (
+                              TIME_SLOTS[index] &&
+                              TIME_SLOTS[index] !== timeSlot
+                            ) {
                               setTimeSlot(TIME_SLOTS[index]);
                             }
                           }}
@@ -279,7 +313,9 @@ function AddTask({ task }: AddTaskProps) {
                                     width: "90%",
                                     justifyContent: "center",
                                     alignItems: "center",
-                                    backgroundColor: isSelected ? "#E8E8E8" : "transparent",
+                                    backgroundColor: isSelected
+                                      ? theme.accentLight
+                                      : "transparent",
                                     borderRadius: isSelected ? 10 : 0,
                                   }}
                                 >
@@ -287,10 +323,14 @@ function AddTask({ task }: AddTaskProps) {
                                     style={{
                                       fontSize: isSelected ? 16 : 13,
                                       fontWeight: isSelected ? "600" : "400",
-                                      color: isSelected ? "#000" : "#999",
+                                      color: isSelected
+                                        ? theme.text
+                                        : theme.textMuted,
                                     }}
                                   >
-                                    {isSelected ? `${item} - ${addMinutesToTime(item, duration)}` : item}
+                                    {isSelected
+                                      ? `${item} - ${addMinutesToTime(item, duration)}`
+                                      : item}
                                   </Text>
                                 </View>
                               </Pressable>
@@ -302,31 +342,54 @@ function AddTask({ task }: AddTaskProps) {
 
                     {/* DEADLINE */}
                     <View style={{ marginVertical: 40, gap: 10 }}>
-                      <Text className="font-inter font-bold text-lg">DEADLINE</Text>
-                      <View className="h-12 flex flex-row bg-white rounded-lg items-center p-2">
+                      <Text
+                        className="font-inter font-bold text-lg"
+                        style={{ color: theme.text }}
+                      >
+                        DEADLINE
+                      </Text>
+                      <View
+                        className="h-12 flex flex-row rounded-lg items-center p-2"
+                        style={{ backgroundColor: theme.surface }}
+                      >
                         <Pressable onPress={() => setShowDatePicker(true)}>
                           <Image
                             source={require("../assets/images/Icons/Calendar_Add.png")}
-                            style={{ width: 24, height: 24 }}
+                            style={{
+                              width: 24,
+                              height: 24,
+                              tintColor: theme.accent,
+                            }}
                           />
                         </Pressable>
                         <TextInput
                           placeholder="Select Date"
+                          placeholderTextColor={theme.textMuted}
                           value={deadline || ""}
                           onChangeText={(text) => {
                             const cleaned = text.replace(/[^0-9]/g, "");
                             let formatted = cleaned;
                             if (cleaned.length >= 5) {
-                              formatted = cleaned.slice(0, 4) + "-" + cleaned.slice(4);
+                              formatted =
+                                cleaned.slice(0, 4) + "-" + cleaned.slice(4);
                             }
                             if (cleaned.length >= 7) {
-                              formatted = cleaned.slice(0, 4) + "-" + cleaned.slice(4, 6) + "-" + cleaned.slice(6, 8);
+                              formatted =
+                                cleaned.slice(0, 4) +
+                                "-" +
+                                cleaned.slice(4, 6) +
+                                "-" +
+                                cleaned.slice(6, 8);
                             }
                             setDeadline(formatted.slice(0, 10));
                           }}
                           keyboardType="numeric"
                           maxLength={10}
-                          style={{ flex: 1, marginLeft: 10 }}
+                          style={{
+                            flex: 1,
+                            marginLeft: 10,
+                            color: theme.text,
+                          }}
                           className="font-inter font-medium"
                         />
                       </View>
@@ -338,7 +401,9 @@ function AddTask({ task }: AddTaskProps) {
                           onChange={(event, selectedDate) => {
                             setShowDatePicker(false);
                             if (selectedDate) {
-                              const iso = selectedDate.toISOString().split("T")[0];
+                              const iso = selectedDate
+                                .toISOString()
+                                .split("T")[0];
                               setDeadline(iso);
                             }
                           }}
@@ -348,19 +413,34 @@ function AddTask({ task }: AddTaskProps) {
 
                     {/* CATEGORY */}
                     <View style={{ gap: 10 }}>
-                      <Text className="font-inter font-bold text-lg">
+                      <Text
+                        className="font-inter font-bold text-lg"
+                        style={{ color: theme.text }}
+                      >
                         CATEGORY
                       </Text>
-                      <View className="h-12 flex flex-row bg-white rounded-lg items-center p-2">
+                      <View
+                        className="h-12 flex flex-row rounded-lg items-center p-2"
+                        style={{ backgroundColor: theme.surface }}
+                      >
                         <Image
                           source={require("../assets/images/Icons/Category.png")}
-                          style={{ width: 24, height: 24 }}
+                          style={{
+                            width: 24,
+                            height: 24,
+                            tintColor: theme.accent,
+                          }}
                         />
                         <TextInput
                           placeholder="Select Category"
+                          placeholderTextColor={theme.textMuted}
                           value={category || ""}
                           onChangeText={setCategory}
-                          style={{ flex: 1, marginLeft: 10 }}
+                          style={{
+                            flex: 1,
+                            marginLeft: 10,
+                            color: theme.text,
+                          }}
                           className="font-inter font-medium"
                         />
                       </View>
@@ -368,26 +448,44 @@ function AddTask({ task }: AddTaskProps) {
 
                     {/* REMINDER */}
                     <View style={{ marginVertical: 40, gap: 10 }}>
-                      <Text className="font-inter font-bold text-lg">
+                      <Text
+                        className="font-inter font-bold text-lg"
+                        style={{ color: theme.text }}
+                      >
                         REMINDER
                       </Text>
-                      <View className="h-12 flex flex-row bg-white rounded-lg items-center p-2">
+                      <View
+                        className="h-12 flex flex-row rounded-lg items-center p-2"
+                        style={{ backgroundColor: theme.surface }}
+                      >
                         <Image
                           source={require("../assets/images/Icons/Alarm.png")}
-                          style={{ width: 24, height: 24 }}
+                          style={{
+                            width: 24,
+                            height: 24,
+                            tintColor: theme.accent,
+                          }}
                         />
                         <TextInput
                           placeholder="No Reminder"
+                          placeholderTextColor={theme.textMuted}
                           value={reminder || ""}
                           onChangeText={setReminder}
-                          style={{ flex: 1, marginLeft: 10 }}
+                          style={{
+                            flex: 1,
+                            marginLeft: 10,
+                            color: theme.text,
+                          }}
                           className="font-inter font-medium"
                         />
                       </View>
                     </View>
 
                     <View className="flex w-full p-10 items-center justify-center">
-                      <Text className="font-inter text-lg">
+                      <Text
+                        className="font-inter text-lg"
+                        style={{ color: theme.text }}
+                      >
                         🌿 Small steps today. Big wins tomorrow. ✨
                       </Text>
                     </View>
