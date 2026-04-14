@@ -1,5 +1,6 @@
+import { useTheme } from "@/constants/ThemeContext";
 import { DurationOption } from "@/constants/types";
-import { FlatList, Text, View, Pressable } from "react-native";
+import { FlatList, Pressable, Text, View } from "react-native";
 
 /* --------------------------- DURATION OPTIONS --------------------------- */
 const durationOptions: DurationOption[] = [
@@ -36,6 +37,9 @@ export default function DurationOptions({
   selectDuration,
   selectedDuration,
 }: DurationOptionsProps) {
+  //@ts-ignore
+  const { theme } = useTheme();
+
   return (
     <View>
       <FlatList
@@ -50,14 +54,16 @@ export default function DurationOptions({
           return (
             <Pressable
               onPress={() => selectDuration(item)}
-              className={`w-[50px] h-[50px] rounded-lg mx-2 items-center justify-center ${
-                isSelected ? "bg-purple-500" : "bg-white"
-              }`}
+              className="w-[50px] h-[50px] rounded-lg mx-2 items-center justify-center"
+              style={{
+                backgroundColor: isSelected ? theme.accent : theme.surface,
+              }}
             >
               <Text
-                className={`text-center font-medium ${
-                  isSelected ? "text-white" : "text-black"
-                }`}
+                className="text-center font-medium"
+                style={{
+                  color: isSelected ? theme.accentText : theme.text,
+                }}
               >
                 {item.label}
               </Text>

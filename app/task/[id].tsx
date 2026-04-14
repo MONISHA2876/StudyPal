@@ -1,3 +1,4 @@
+import { useTheme } from "@/constants/ThemeContext";
 import { handleEdit } from "@/database/DatabaseFunctions";
 import { deleteTask } from "@/database/SecureStoreFunctions";
 import {
@@ -22,6 +23,9 @@ import Animated, {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function TaskDetails() {
+  //@ts-ignore
+  const { theme } = useTheme();
+
   const { id, timeslot, emoji, title, duration, categories, color } =
     useLocalSearchParams<{
       id?: string;
@@ -41,7 +45,7 @@ export default function TaskDetails() {
     }
   })();
 
-  const safeColor = color ?? "#E8E8E8";
+  const safeColor = color ?? theme.cardDefault;
 
   const handleDeleteTask = async (idOfTaskToDelete: number) => {
     await deleteTask(idOfTaskToDelete);
@@ -96,7 +100,6 @@ export default function TaskDetails() {
   // ── useFocusEffect ────────────────────────────────────────────
   useFocusEffect(
     useCallback(() => {
-      // Reset
       cardSlide.value = 60;
       cardOpacity.value = 0;
       headerScale.value = 0.85;
@@ -108,27 +111,23 @@ export default function TaskDetails() {
       bottomBarSlide.value = 80;
       bottomBarOpacity.value = 0;
 
-      // 1. Card entrance
       cardSlide.value = withTiming(0, {
         duration: 480,
         easing: Easing.out(Easing.cubic),
       });
       cardOpacity.value = withTiming(1, { duration: 400 });
 
-      // 2. Header scale
       headerScale.value = withDelay(
         100,
         withTiming(1, { duration: 500, easing: Easing.out(Easing.back(1.4)) }),
       );
 
-      // 3. Badges
       badgeOpacity.value = withDelay(280, withTiming(1, { duration: 350 }));
       badgeSlide.value = withDelay(
         280,
         withTiming(0, { duration: 350, easing: Easing.out(Easing.cubic) }),
       );
 
-      // 4. Pomodoro
       const pomodoroDelay = parsedCategories.length > 0 ? 420 : 280;
       pomodoroOpacity.value = withDelay(
         pomodoroDelay,
@@ -139,20 +138,18 @@ export default function TaskDetails() {
         withSpring(1, { damping: 10, stiffness: 120 }),
       );
 
-      // 5. Bottom bar
       bottomBarSlide.value = withDelay(
         200,
         withTiming(0, { duration: 450, easing: Easing.out(Easing.cubic) }),
       );
       bottomBarOpacity.value = withDelay(200, withTiming(1, { duration: 350 }));
 
-      // 6. Pulse loop
       checkPulse.value = withRepeat(
         withSequence(
           withTiming(1.1, { duration: 900, easing: Easing.inOut(Easing.ease) }),
           withTiming(1, { duration: 900, easing: Easing.inOut(Easing.ease) }),
         ),
-        -1, // infinite
+        -1,
         false,
       );
 
@@ -163,7 +160,10 @@ export default function TaskDetails() {
   );
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <SafeAreaView
+      className="flex-1"
+      style={{ backgroundColor: theme.background }}
+    >
       <View className="flex-1 px-4 pt-4 pb-6 justify-center items-stretch gap-4">
         {/* ── Card ── */}
         <Animated.View
@@ -171,7 +171,10 @@ export default function TaskDetails() {
           className="rounded-lg p-6 shadow-2xl flex gap-4"
         >
           {/* Timeslot */}
-          <Text className="text-[#3F3939] font-normal font-inter opacity-[51%] tracking-widest mb-3">
+          <Text
+            className="font-normal font-inter opacity-[51%] tracking-widest mb-3"
+            style={{ color: theme.cardTime }}
+          >
             {timeslot || "Any Time"}
           </Text>
 
@@ -187,9 +190,9 @@ export default function TaskDetails() {
               {emoji ?? "🍜"}
             </Text>
             <Text
-              className="flex-1 text-black font-bold font-inter leading-7"
+              className="flex-1 font-bold font-inter leading-7"
               numberOfLines={2}
-              style={{ fontSize: 20 }}
+              style={{ fontSize: 20, color: theme.cardTitle }}
             >
               {title}
             </Text>
@@ -200,15 +203,14 @@ export default function TaskDetails() {
             style={[
               durationStyle,
               {
-                color: "#3F3939",
+                color: theme.cardDuration,
                 opacity: 0.51,
                 letterSpacing: 1,
               },
             ]}
+            className="font-normal font-inter tracking-widest mb-3"
           >
-            <Text className="text-[#3F3939] font-normal font-inter opacity-[51%] tracking-widest mb-3">
-              {duration ? `${duration} minutes` : "All day"}
-            </Text>
+            {duration ? `${duration} minutes` : "All day"}
           </Animated.Text>
 
           {/* Category badges */}
@@ -226,11 +228,11 @@ export default function TaskDetails() {
             {parsedCategories.map((cat: string, i: number) => (
               <View
                 key={i}
-                style={{ backgroundColor: safeColor + "28" }}
+                style={{ backgroundColor: theme.accentLight }}
                 className="px-3 py-1.5 rounded-full"
               >
                 <Text
-                  style={{ color: safeColor }}
+                  style={{ color: theme.accent }}
                   className="text-xs font-semibold tracking-wide"
                 >
                   {cat}
@@ -244,8 +246,8 @@ export default function TaskDetails() {
             style={{
               height: 2,
               marginVertical: 10,
-              backgroundColor: "#3F3939",
-              opacity: 0.15,
+              backgroundColor: theme.border,
+              opacity: 0.6,
             }}
           />
 
@@ -261,8 +263,8 @@ export default function TaskDetails() {
                 <View className="flex flex-row gap-2 items-center">
                   <Text style={{ fontSize: 25, marginRight: 5 }}>⏱</Text>
                   <Text
-                    className="text-[#3D3048] font-semibold font-inter"
-                    style={{ fontSize: 15 }}
+                    className="font-semibold font-inter"
+                    style={{ fontSize: 15, color: theme.accent }}
                   >
                     Start Pomodoro
                   </Text>
@@ -289,11 +291,14 @@ export default function TaskDetails() {
         >
           <TouchableOpacity
             activeOpacity={0.85}
-            style={{ backgroundColor: safeColor }}
+            style={{ backgroundColor: theme.accent }}
             className="flex-1 p-6 rounded-xl items-center justify-center shadow-lg"
             onPress={() => handleEdit(Number(id), router)}
           >
-            <Text className="text-black text-base font-bold tracking-wide">
+            <Text
+              className="text-base font-bold tracking-wide"
+              style={{ color: theme.accentText }}
+            >
               Edit Task
             </Text>
           </TouchableOpacity>

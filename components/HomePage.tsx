@@ -29,11 +29,9 @@ export default function HomePage() {
 
   useEffect(() => {
     const filtered = allTasks.filter((task) => {
-      // Convert both dates to same format for comparison
       const taskDate = new Date(task.createdAt);
       const selectedDateString = selectedDate.toDateString();
       const taskDateString = taskDate.toDateString();
-
       return taskDateString === selectedDateString;
     });
     setFilteredTasks(filtered);
@@ -47,23 +45,25 @@ export default function HomePage() {
     const updated = allTasks.map((task) =>
       task.id === id ? { ...task, isCompleted: !task.isCompleted } : task,
     );
-
     setAllTasks(updated);
     save("Tasks", JSON.stringify(updated));
   };
 
   return (
     <SafeAreaView
-      className={`${theme.background} w-screen min-h-screen flex flex-col items-center justify-start`}
-      style={{ padding: 0, margin: 0 }}
+      className="w-screen min-h-screen flex flex-col items-center justify-start"
+      style={{ padding: 0, margin: 0, backgroundColor: theme.background }}
       edges={["left", "right"]}
     >
       <View
         id="header"
-        className={`${theme.surface} w-screen flex items-center justify-center`}
-        style={{ margin: 0, paddingTop: 40 }}
+        className="w-screen flex items-center justify-center"
+        style={{ margin: 0, paddingTop: 40, backgroundColor: theme.background }}
       >
-        <Text className="font-pompiere text-4xl font-thin w-full text-center p-2 px-4">
+        <Text
+          className="font-pompiere text-4xl font-thin w-full text-center p-2 px-4"
+          style={{ color: theme.headerTitle }}
+        >
           Today
         </Text>
         <Link href="/settings" asChild>
@@ -76,8 +76,8 @@ export default function HomePage() {
 
       <View
         id="tasksList"
-        className=" bg-gray-100 items-center justify-start p-6"
-        style={{ flex: 1, width: "100%" }}
+        className="items-center justify-start p-6"
+        style={{ flex: 1, width: "100%", backgroundColor: theme.surface }}
       >
         <ScrollView
           showsVerticalScrollIndicator={false}
@@ -89,10 +89,16 @@ export default function HomePage() {
           >
             {filteredTasks.length === 0 ? (
               <View className="w-full p-8 flex items-center justify-center">
-                <Text className="font-inter text-lg text-gray-500 text-center">
+                <Text
+                  className="font-inter text-lg text-center"
+                  style={{ color: theme.textMuted }}
+                >
                   🌿 No tasks for this day
                 </Text>
-                <Text className="font-inter text-sm text-gray-400 text-center mt-2">
+                <Text
+                  className="font-inter text-sm text-center mt-2"
+                  style={{ color: theme.textMuted }}
+                >
                   Add a task to get started!
                 </Text>
               </View>
@@ -120,13 +126,22 @@ export default function HomePage() {
                       asChild
                     >
                       <Pressable className="flex justify-start items-start gap-4 flex-1">
-                        <Text className="text-[#3F3939] font-normal font-md font-inter opacity-[51%]">
+                        <Text
+                          className="font-normal font-md font-inter opacity-[51%]"
+                          style={{ color: theme.cardTime }}
+                        >
                           {task.timeSlot || "Any Time"}
                         </Text>
-                        <Text className="text-black font-bold font-inter font-xl">
+                        <Text
+                          className="font-bold font-inter font-xl"
+                          style={{ color: theme.cardTitle }}
+                        >
                           {task.emoji} {task.title}
                         </Text>
-                        <Text className="text-[#3F3939] font-normal font-md font-inter opacity-[51%]">
+                        <Text
+                          className="font-normal font-md font-inter opacity-[51%]"
+                          style={{ color: theme.cardDuration }}
+                        >
                           {task.duration
                             ? `${task.duration} minutes`
                             : "All day"}
@@ -134,12 +149,19 @@ export default function HomePage() {
                       </Pressable>
                     </Link>
                     <View className="flex justify-start items-end">
-                      <Text className="text-[#3F3939] font-normal font-md font-inter opacity-[51%]">
+                      <Text
+                        className="font-normal font-md font-inter opacity-[51%]"
+                        style={{ color: theme.cardTime }}
+                      >
                         {task.Categories ? task.Categories.join(", ") : " "}
                       </Text>
                       <Pressable
                         onPressOut={() => handleIsComplete(task.id)}
-                        className="border border-black h-8 w-8 rounded-full p-1 mt-2"
+                        className="h-8 w-8 rounded-full p-1 mt-2"
+                        style={{
+                          borderWidth: 1,
+                          borderColor: theme.checkboxBorder,
+                        }}
                       >
                         <Image
                           source={require("../assets/images/Icons/Completed.png")}
@@ -147,6 +169,9 @@ export default function HomePage() {
                             width: 20,
                             height: 20,
                             opacity: task.isCompleted ? 1 : 0,
+                            tintColor: task.isCompleted
+                              ? theme.checkboxTick
+                              : undefined,
                           }}
                         />
                       </Pressable>

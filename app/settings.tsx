@@ -4,13 +4,13 @@ import { Button, Text, View } from "react-native";
 
 export default function Settings() {
   //@ts-ignore
-  const { setTheme } = useTheme();
-  const { setColorScheme } = useColorScheme(); // 🔥 important (NativeWind)
+  const { theme, setTheme } = useTheme();
+  const { setColorScheme } = useColorScheme();
 
   const handleThemeChange = (mode: "light" | "dark" | "system") => {
     if (mode === "system") {
       setTheme("system");
-      setColorScheme("light"); // fallback (ya tu system detect kar sakta hai)
+      setColorScheme("light");
       console.log("System theme selected");
       return;
     }
@@ -21,8 +21,13 @@ export default function Settings() {
   };
 
   return (
-    <View className="flex-1 items-center justify-center gap-4">
-      <Text className="text-2xl font-bold">Choose Theme</Text>
+    <View
+      className="flex-1 items-center justify-center gap-4"
+      style={{ backgroundColor: theme.background }}
+    >
+      <Text className="text-2xl font-bold" style={{ color: theme.text }}>
+        Choose Theme
+      </Text>
 
       <Button title="Light" onPress={() => handleThemeChange("light")} />
 

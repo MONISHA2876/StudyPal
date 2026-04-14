@@ -1,3 +1,4 @@
+import { useTheme } from "@/constants/ThemeContext";
 import { CalendarDate } from "@/constants/types";
 import { useMemo, useRef, useState } from "react";
 import { FlatList, Pressable, Text, View } from "react-native";
@@ -29,6 +30,8 @@ export default function HorizontalCalendar({
 }: {
   onDateChange: (date: Date) => void;
 }) {
+  //@ts-ignore
+  const { theme } = useTheme();
   const dates = useMemo(() => generateDatesAroundToday(14), []);
   const listRef = useRef<FlatList<CalendarDate> | null>(null);
 
@@ -81,17 +84,25 @@ export default function HorizontalCalendar({
               className="w-[43px] h-[51px] rounded-lg font-inter flex items-center justify-center m-2 p-0"
               style={{
                 boxShadow: "1px 4px 6px rgba(0, 0, 0, 0.3)",
-                backgroundColor: active ? "#E8D1F3" : "#A889B7",
+                backgroundColor: active
+                  ? theme.dateActiveBg
+                  : theme.dateInactiveBg,
                 transform: active ? [{ scale: 1.1 }] : [{ scale: 1 }],
               }}
             >
               <Text
-                className={`text-xs font-semibold ${active ? "text-[#7F4CA6]" : "text-white"}`}
+                className="text-xs font-semibold"
+                style={{
+                  color: active ? theme.dateActiveText : theme.dateInactiveText,
+                }}
               >
                 {item.day}
               </Text>
               <Text
-                className={`text-lg font-semibold ${active ? "text-[#7F4CA6]" : "text-white"}`}
+                className="text-lg font-semibold"
+                style={{
+                  color: active ? theme.dateActiveText : theme.dateInactiveText,
+                }}
               >
                 {item.date}
               </Text>
