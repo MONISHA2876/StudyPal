@@ -1,6 +1,6 @@
 import { useTheme } from "@/constants/ThemeContext";
 import { CalendarDate } from "@/constants/types";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { FlatList, Pressable, Text, View } from "react-native";
 
 const generateDatesAroundToday = (range = 14): CalendarDate[] => {
@@ -23,7 +23,9 @@ const generateDatesAroundToday = (range = 14): CalendarDate[] => {
   return dates;
 };
 
-const ITEM_WIDTH = 51;
+const ITEM_WIDTH = 43;
+const ITEM_MARGIN = 8;
+const ITEM_TOTAL = ITEM_WIDTH + ITEM_MARGIN * 2;
 
 export default function HorizontalCalendar({
   onDateChange,
@@ -34,17 +36,21 @@ export default function HorizontalCalendar({
   const { theme } = useTheme();
   const dates = useMemo(() => generateDatesAroundToday(14), []);
   const listRef = useRef<FlatList<CalendarDate> | null>(null);
-
   const todayIndex = dates.findIndex((d) => d.isToday);
   const [selected, setSelected] = useState<CalendarDate>(dates[todayIndex]);
+  const [isReady, setIsReady] = useState(false);
 
-  const scrollToToday = () => {
-    listRef.current?.scrollToIndex({
-      index: todayIndex,
-      animated: true,
-      viewPosition: 0.5,
-    });
-  };
+  useEffect(() => {
+    if (!isReady) return;
+    const timer = setTimeout(() => {
+      listRef.current?.scrollToIndex({
+        index: todayIndex,
+        animated: false,
+        viewPosition: 0.5,
+      });
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [isReady]);
 
   const onSelect = (item: CalendarDate) => {
     setSelected(item);
@@ -59,25 +65,19 @@ export default function HorizontalCalendar({
         horizontal
         showsHorizontalScrollIndicator={false}
         keyExtractor={(item) => item.id}
+        initialNumToRender={dates.length} // ✅ saare items pehle render karo
+        maxToRenderPerBatch={dates.length}
+        windowSize={dates.length}
         getItemLayout={(_, index) => ({
-          length: ITEM_WIDTH,
-          offset: ITEM_WIDTH * index,
+          length: ITEM_TOTAL,
+          offset: ITEM_TOTAL * index,
           index,
         })}
         contentContainerStyle={{ paddingHorizontal: 16 }}
-        onLayout={scrollToToday}
-        onScrollToIndexFailed={(info) => {
-          setTimeout(() => {
-            listRef.current?.scrollToIndex({
-              index: info.index,
-              animated: true,
-              viewPosition: 0.5,
-            });
-          }, 300);
-        }}
+        onLayout={() => setIsReady(true)} // ✅ ready hone par scroll
+        onScrollToIndexFailed={() => {}}
         renderItem={({ item }) => {
           const active = item.id === selected.id;
-
           return (
             <Pressable
               onPress={() => onSelect(item)}
