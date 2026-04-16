@@ -28,8 +28,12 @@ export default function TabBar() {
     <View className="absolute bottom-0 left-4 right-4 items-center pb-safe">
       {/* Card shell */}
       <View
-        className="flex-row items-center rounded-full px-6 py-3 shadow-lg shadow-black/10 w-full justify-between"
-        style={{ backgroundColor: theme.tabBarBg }}
+        className="flex-row items-center rounded-full px-6 py-2 shadow-lg shadow-black/10 w-full justify-between"
+        style={{
+          backgroundColor: theme.tabBarBg,
+          borderColor: theme.border,
+          borderWidth: 3,
+        }}
       >
         {/* Left two tabs */}
         {TABS.slice(0, 2).map(({ icon, route }) => (
