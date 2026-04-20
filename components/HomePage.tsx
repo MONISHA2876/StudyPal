@@ -104,11 +104,14 @@ export default function HomePage() {
               </View>
             ) : (
               filteredTasks.map((task) => {
+                const colorOfTask: string = task.color || "#F5E6CC";
+                const colorFromTheme =
+                  theme[colorOfTask as keyof typeof theme] || colorOfTask;
                 return (
                   <View
                     key={task.id}
                     className="w-full rounded-lg p-4 flex flex-row justify-between"
-                    style={{ backgroundColor: task.color }}
+                    style={{ backgroundColor: colorFromTheme }}
                   >
                     <Link
                       href={{
