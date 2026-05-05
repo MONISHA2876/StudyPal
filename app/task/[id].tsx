@@ -46,6 +46,7 @@ export default function TaskDetails() {
   })();
 
   const safeColor = color ?? theme.cardDefault;
+  const safeColorFromTheme = theme[color as keyof typeof theme] || safeColor;
 
   const handleDeleteTask = async (idOfTaskToDelete: number) => {
     await deleteTask(idOfTaskToDelete);
@@ -167,7 +168,10 @@ export default function TaskDetails() {
       <View className="flex-1 px-4 pt-4 pb-6 justify-center items-stretch gap-4">
         {/* ── Card ── */}
         <Animated.View
-          style={[cardStyle, { backgroundColor: safeColor, width: "100%" }]}
+          style={[
+            cardStyle,
+            { backgroundColor: safeColorFromTheme, width: "100%" },
+          ]}
           className="rounded-lg p-6 shadow-2xl flex gap-4"
         >
           {/* Timeslot */}

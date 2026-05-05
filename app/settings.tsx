@@ -7,11 +7,11 @@ export default function Settings() {
   const { theme, setTheme } = useTheme();
   const { setColorScheme } = useColorScheme();
 
-  const handleThemeChange = (mode: "light" | "dark" | "system") => {
+  const handleThemeChange = (mode: any) => {
     if (mode === "system") {
       setTheme("system");
       setColorScheme("light");
-      console.log("System theme selected");
+
       return;
     }
 
@@ -32,6 +32,12 @@ export default function Settings() {
       <Button title="Light" onPress={() => handleThemeChange("light")} />
 
       <Button title="Dark" onPress={() => handleThemeChange("dark")} />
+
+      <Button title="Forest" onPress={() => handleThemeChange("forest")} />
+
+      <Button title="Rose" onPress={() => handleThemeChange("rose")} />
+
+      <Button title="Dusky" onPress={() => handleThemeChange("dusk")} />
 
       <Button
         title="System Default"

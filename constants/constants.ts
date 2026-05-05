@@ -1,10 +1,18 @@
 export const colors: string[] = [
-  "#F5E6CC",
-  "#E1F9BB",
-  "#FAC1B8",
-  "#EBCBF4",
-  "#BEEEE4",
-  "#9ED0E6",
+  "Sand",
+  "Sage",
+  "Blush",
+  "Lavender",
+  "Mist",
+  "Slate",
+];
+
+export const hiddenScreens = [
+  "AddTask",
+  "Pomodoro",
+  "notes",
+  "addNote",
+  "[id]",
 ];
 
 export const ICONS: Record<string, any> = {

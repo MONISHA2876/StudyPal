@@ -16,19 +16,19 @@ async function getValueFor(key: string) {
 async function saveTask(value: Task) {
   await getValueFor("Tasks").then((res) => {
     let tasks: Task[];
-    
+
     if (res) {
       tasks = JSON.parse(res);
       const taskIndex = tasks.findIndex((task) => task.id === value.id);
-        if(taskIndex !== -1){
-          tasks[taskIndex] = value;
-        }else{
-          tasks.push(value);
-        }
+      if (taskIndex !== -1) {
+        tasks[taskIndex] = value;
+      } else {
+        tasks.push(value);
+      }
     } else {
       tasks = [value];
     }
-    
+
     save("Tasks", JSON.stringify(tasks));
   });
 }
@@ -76,14 +76,14 @@ async function taskEdit(id: number, value: any | any[], choice: number) {
   });
 }
 
-async function getTask(id: number){
+async function getTask(id: number) {
   const res = await getValueFor("Tasks");
 
   if (!res) return;
 
   const tasks: Task[] = JSON.parse(res);
   const taskIndex = tasks.findIndex((task) => task.id === id);
-  const task: Task = tasks[taskIndex]
+  const task: Task = tasks[taskIndex];
   return task;
 }
 
@@ -98,6 +98,49 @@ async function deleteTask(id: number) {
   await save("Tasks", JSON.stringify(filteredTask));
 }
 
-export { getValueFor,save,  taskEdit, saveTask, deleteTask, getTask };
-
 // "Tasks" key is containing an array of all the tasks in the app.
+
+//Notes features
+
+async function saveNote(value: any) {
+  await getValueFor("Notes").then((res) => {
+    let notes: any[];
+    if (res) {
+      notes = JSON.parse(res);
+      notes.push(value);
+    } else {
+      notes = [value];
+    }
+
+    save("Notes", JSON.stringify(notes));
+  });
+}
+
+async function getNote(id: number) {
+  const res = await getValueFor("Notes");
+  if (!res) return;
+  const notes = JSON.parse(res);
+  const noteIndex = notes.findIndex((note: any) => note.id === id);
+  const note = notes[noteIndex];
+  return note;
+}
+
+async function deleteNote(id: number) {
+  const res = await getValueFor("Notes");
+  if (!res) return;
+
+  const notes = JSON.parse(res);
+  const filteredNotes = notes.filter((note: any) => note.id !== id);
+  await save("Notes", JSON.stringify(filteredNotes));
+}
+
+export {
+  deleteNote, deleteTask, getNote,
+  getTask,
+  getValueFor,
+  save,
+  saveNote,
+  saveTask,
+  taskEdit
+};
+

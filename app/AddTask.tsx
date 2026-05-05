@@ -140,9 +140,9 @@ function AddTask({ task }: AddTaskProps) {
       alert("Please add title for your task first :)");
     }
   };
-
+  const colorFromTheme = theme[color as keyof typeof theme] || theme.background;
   return (
-    <SafeAreaProvider style={{ flex: 1, backgroundColor: theme.surface }}>
+    <SafeAreaProvider style={{ flex: 1, backgroundColor: theme.background }}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1 }}
@@ -154,7 +154,7 @@ function AddTask({ task }: AddTaskProps) {
             <View
               style={{
                 flex: 1,
-                backgroundColor: theme.background,
+                backgroundColor: colorFromTheme,
                 borderTopEndRadius: 30,
                 borderTopStartRadius: 30,
               }}
@@ -219,6 +219,8 @@ function AddTask({ task }: AddTaskProps) {
                       </Text>
                       <View className="w-full flex flex-row justify-between">
                         {colors.map((item, index) => {
+                          const colorFromTheme =
+                            theme[item as keyof typeof theme] || item;
                           return (
                             <Pressable
                               key={index}
@@ -226,7 +228,7 @@ function AddTask({ task }: AddTaskProps) {
                                 height: 40,
                                 width: 40,
                                 borderRadius: 20,
-                                backgroundColor: item,
+                                backgroundColor: colorFromTheme,
                                 borderColor: theme.border,
                                 borderWidth: 2,
                               }}
