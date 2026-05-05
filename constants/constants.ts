@@ -7,6 +7,14 @@ export const colors: string[] = [
   "Slate",
 ];
 
+export const hiddenScreens = [
+  "AddTask",
+  "Pomodoro",
+  "notes",
+  "addNote",
+  "[id]",
+];
+
 export const ICONS: Record<string, any> = {
   index: require("@/assets/images/Icons/home.png"),
   calendar: require("@/assets/images/Icons/calendar.png"),

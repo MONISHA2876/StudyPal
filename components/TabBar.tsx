@@ -16,7 +16,7 @@ const TABS: { icon: ImageSourcePropType; route: Href }[] = [
   { icon: HomeIcon, route: "/" as Href },
   { icon: CalendarIcon, route: "/schedule" as Href },
   { icon: StatsIcon, route: "/stats" as Href },
-  { icon: EditIcon, route: "/notes" as Href },
+  { icon: EditIcon, route: "/notes/notes" as Href },
 ];
 
 export default function TabBar() {

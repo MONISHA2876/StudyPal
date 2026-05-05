@@ -1,4 +1,5 @@
 import TabBar from "@/components/TabBar";
+import { hiddenScreens } from "@/constants/constants";
 import { ThemeProvider } from "@/constants/ThemeContext";
 import { useFonts } from "expo-font";
 import { Slot, useSegments } from "expo-router";
@@ -15,8 +16,6 @@ export default function RootLayout() {
 
   // current screen ka naam (last segment)
   const currentScreen = segments[segments.length - 1];
-
-  const hiddenScreens = ["AddTask", "Pomodoro", "notes", "[id]"];
 
   const hideTabBar = hiddenScreens.includes(currentScreen);
 
