@@ -125,8 +125,19 @@ async function getNote(id: number) {
   return note;
 }
 
+async function deleteNote(id: number) {
+  const res = await getValueFor("Notes");
+  if (!res) return;
+
+  const notes = JSON.parse(res);
+  const filteredNotes = notes.filter((note: any) => note.id !== id);
+  await save("Notes", JSON.stringify(filteredNotes));
+}
+
 export {
-  deleteTask, getNote, getTask, getValueFor,
+  deleteNote, deleteTask, getNote,
+  getTask,
+  getValueFor,
   save,
   saveNote,
   saveTask,

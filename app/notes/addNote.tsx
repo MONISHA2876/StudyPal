@@ -3,9 +3,11 @@ import { saveNote } from "@/database/SecureStoreFunctions";
 import { router } from "expo-router";
 import { useState } from "react";
 import {
+  Alert,
   Image,
   Pressable,
   ScrollView,
+  Share,
   Text,
   TextInput,
   View,
@@ -31,6 +33,17 @@ export default function AddNote() {
       createdAt: new Date().toISOString(),
     });
     router.back();
+  };
+
+  const handleShareNote = async () => {
+    try {
+      await Share.share({
+        message: `Title: ${title}\n\nContent: ${content}`,
+      });
+    } catch (e) {
+      console.log("Error sharing note:", e);
+      Alert.alert("Error", "An error occurred while trying to share the note.");
+    }
   };
 
   return (
@@ -67,7 +80,7 @@ export default function AddNote() {
                   style={{ width: 30, height: 30, tintColor: theme.text }}
                 />
               </Pressable>
-              <Pressable onPress={() => router.back()}>
+              <Pressable onPress={handleShareNote}>
                 <Image
                   source={require("@/assets/images/Icons/Share.png")}
                   style={{ width: 30, height: 30, tintColor: theme.text }}

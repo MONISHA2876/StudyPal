@@ -1,11 +1,13 @@
 import { useTheme } from "@/constants/ThemeContext";
-import { getNote } from "@/database/SecureStoreFunctions";
+import { deleteNote, getNote } from "@/database/SecureStoreFunctions";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import {
+  Alert,
   Image,
   Pressable,
   ScrollView,
+  Share,
   Text,
   TextInput,
   View,
@@ -18,6 +20,7 @@ export default function NoteDetails() {
   const { theme } = useTheme();
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [createdOn, setCreatedOn] = useState<number | null>(null);
 
   //Get the note details using the id from params
   useEffect(() => {
@@ -27,12 +30,41 @@ export default function NoteDetails() {
         if (note) {
           setTitle(note.title);
           setContent(note.content);
+          setCreatedOn(note.createdAt);
         }
       }
     };
 
     fetchNote();
   }, [id]);
+
+  const handleDeleteNote = async () => {
+    Alert.alert("Delete Note", "Are you sure you want to delete this note :(", [
+      {
+        text: "Cancel",
+        style: "cancel",
+      },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: async () => {
+          await deleteNote(Number(id));
+          router.back();
+        },
+      },
+    ]);
+  };
+
+  const handleShareNote = async () => {
+    try {
+      await Share.share({
+        message: `Title: ${title}\n\nContent: ${content}`,
+      });
+    } catch (e) {
+      console.log("Error sharing note:", e);
+      Alert.alert("Error", "An error occurred while trying to share the note.");
+    }
+  };
 
   return (
     <SafeAreaProvider style={{ backgroundColor: theme.background, flex: 1 }}>
@@ -68,11 +100,14 @@ export default function NoteDetails() {
                   style={{ width: 30, height: 30, tintColor: theme.text }}
                 />
               </Pressable>
-              <Pressable onPress={() => router.back()}>
+              <Pressable onPress={handleShareNote}>
                 <Image
                   source={require("@/assets/images/Icons/Share.png")}
                   style={{ width: 30, height: 30, tintColor: theme.text }}
                 />
+              </Pressable>
+              <Pressable onPress={handleDeleteNote}>
+                <Text style={{ fontSize: 25, margin: 5 }}>🗑️</Text>
               </Pressable>
             </View>
           </View>
@@ -96,6 +131,29 @@ export default function NoteDetails() {
               multiline
             />
           </View>
+
+          <Text
+            style={{
+              color: theme.textMuted,
+              fontSize: 12,
+              alignSelf: "flex-end",
+              marginTop: 50,
+            }}
+          >
+            Created On
+          </Text>
+          <Text
+            style={{
+              color: theme.textMuted,
+              fontSize: 12,
+              alignSelf: "flex-end",
+            }}
+          >
+            {
+              //@ts-ignore
+              new Date(createdOn).toLocaleDateString() || "No Date"
+            }
+          </Text>
         </View>
       </ScrollView>
     </SafeAreaProvider>
