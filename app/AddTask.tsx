@@ -1,4 +1,3 @@
-import DurationOptions from "@/components/DurationOptions";
 import { colors } from "@/constants/constants";
 import { useTheme } from "@/constants/ThemeContext";
 import { DurationOption, Task } from "@/constants/types";
@@ -7,7 +6,6 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-  FlatList,
   Image,
   Keyboard,
   KeyboardAvoidingView,
@@ -249,101 +247,87 @@ function AddTask({ task }: AddTaskProps) {
                       >
                         DURATION
                       </Text>
-                      <DurationOptions
-                        selectDuration={handleChangeDuration}
-                        selectedDuration={duration}
-                      />
-                    </View>
-
-                    {/* WHEN */}
-                    <View>
-                      <Text
-                        className="font-inter font-bold text-lg"
-                        style={{ color: theme.text }}
-                      >
-                        WHEN
-                      </Text>
                       <View
                         style={{
-                          height: ITEM_HEIGHT * 3,
-                          backgroundColor: theme.surface,
-                          borderRadius: 16,
-                          marginTop: 8,
-                          overflow: "hidden",
+                          flexDirection: "row",
+                          alignItems: "center",
+                          justifyContent: "space-between",
                         }}
                       >
-                        <FlatList
-                          data={TIME_SLOTS}
-                          keyExtractor={(_, index) => index.toString()}
-                          showsVerticalScrollIndicator={false}
-                          snapToInterval={ITEM_HEIGHT}
-                          decelerationRate="fast"
-                          nestedScrollEnabled={true}
-                          scrollEnabled={true}
-                          initialScrollIndex={MID_INDEX - 2}
-                          getItemLayout={(_, index) => ({
-                            length: ITEM_HEIGHT,
-                            offset: ITEM_HEIGHT * index,
-                            index,
-                          })}
-                          onScroll={(e) => {
-                            const index = Math.round(
-                              e.nativeEvent.contentOffset.y / ITEM_HEIGHT + 1,
-                            );
-                            if (
-                              TIME_SLOTS[index] &&
-                              TIME_SLOTS[index] !== timeSlot
-                            ) {
-                              setTimeSlot(TIME_SLOTS[index]);
-                            }
+                        <View
+                          style={{
+                            backgroundColor: theme.surface,
+                            borderRadius: 8,
+                            padding: 10,
+                            width: "40%",
+                            height: 50,
+                            flexDirection: "row",
+                            alignItems: "center",
+                            gap: 15,
                           }}
-                          scrollEventThrottle={16}
-                          renderItem={({ item }) => {
-                            const isSelected = timeSlot === item;
-                            return (
-                              <Pressable
-                                onPress={() => setTimeSlot(item)}
-                                style={{
-                                  height: ITEM_HEIGHT,
-                                  justifyContent: "center",
-                                  alignItems: "center",
-                                }}
-                              >
-                                <View
-                                  style={{
-                                    height: ITEM_HEIGHT - 4,
-                                    width: "90%",
-                                    justifyContent: "center",
-                                    alignItems: "center",
-                                    backgroundColor: isSelected
-                                      ? theme.accentLight
-                                      : "transparent",
-                                    borderRadius: isSelected ? 10 : 0,
-                                  }}
-                                >
-                                  <Text
-                                    style={{
-                                      fontSize: isSelected ? 16 : 13,
-                                      fontWeight: isSelected ? "600" : "400",
-                                      color: isSelected
-                                        ? theme.text
-                                        : theme.textMuted,
-                                    }}
-                                  >
-                                    {isSelected
-                                      ? `${item} - ${addMinutesToTime(item, duration)}`
-                                      : item}
-                                  </Text>
-                                </View>
-                              </Pressable>
-                            );
+                        >
+                          <Image
+                            source={require("../assets/images/Icons/Alarm.png")}
+                            style={{
+                              width: 24,
+                              height: 24,
+                              tintColor: theme.accent,
+                            }}
+                          />
+                          <Text
+                            className="font-inter"
+                            style={{ color: theme.textMuted, fontSize: 20 }}
+                          >
+                            09:00
+                          </Text>
+                        </View>
+                        <View
+                          style={{
+                            backgroundColor: theme.surface,
+                            borderRadius: 8,
+                            width: "13%",
+                            height: 50,
+                            alignItems: "center",
+                            alignContent: "center",
+                            justifyContent: "center",
                           }}
-                        />
+                        >
+                          <Text style={{ color: theme.text, fontSize: 25 }}>
+                            {"→"}
+                          </Text>
+                        </View>
+                        <View
+                          style={{
+                            backgroundColor: theme.surface,
+                            borderRadius: 8,
+                            padding: 10,
+                            width: "40%",
+                            height: 50,
+                            flexDirection: "row",
+                            alignItems: "center",
+                            gap: 15,
+                          }}
+                        >
+                          <Image
+                            source={require("../assets/images/Icons/Alarm.png")}
+                            style={{
+                              width: 24,
+                              height: 24,
+                              tintColor: theme.accent,
+                            }}
+                          />
+                          <Text
+                            className="font-inter"
+                            style={{ color: theme.textMuted, fontSize: 20 }}
+                          >
+                            10:00
+                          </Text>
+                        </View>
                       </View>
                     </View>
 
                     {/* DEADLINE */}
-                    <View style={{ marginVertical: 40, gap: 10 }}>
+                    <View style={{ marginBottom: 40, gap: 10 }}>
                       <Text
                         className="font-inter font-bold text-lg"
                         style={{ color: theme.text }}
